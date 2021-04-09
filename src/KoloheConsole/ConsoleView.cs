@@ -6,19 +6,11 @@ using System.Threading.Tasks;
 
 namespace Kolohe.CLI
 {
-    class ConsoleView : SingleScreenView
+    class ConsoleView : SingleScreenView<ConsoleTile>
     {
-        public char[,] Buffer { get; private set; }
-
         public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight)
         {
             Console.CursorVisible = false;
-        }
-
-        public override void Resize(int width, int height)
-        {
-            base.Resize(width, height);
-            Buffer = new char[width, height];
         }
 
         public override async Task<EngineInput> ReadInputAsync()
@@ -75,47 +67,40 @@ namespace Kolohe.CLI
             return refresh;
         }
 
-        protected override async Task DrawMapTileAsync(int x, int y, MapTile tile, bool forceRefresh)
+        protected override ConsoleTile GetTile(MapTile mapTile, bool player)
         {
-            char oldChar = Buffer[x, y];
-            char newChar;
+            if (player)
+            {
+                return new ConsoleTile()
+                {
+                    Char = '@',
+                };
+            }
 
-            switch (tile)
+            switch (mapTile)
             {
                 case MapTile.Floor:
-                    newChar = '.';
-                    break;
+                    return new ConsoleTile()
+                    {
+                        Char = '.',
+                    };
                 case MapTile.Wall:
-                    newChar = '#';
-                    break;
+                    return new ConsoleTile()
+                    {
+                        Char = '#',
+                    };
                 default:
-                    newChar = ' ';
-                    break;
-            }
-            
-            Buffer[x, y] = newChar;
-
-            if (oldChar != newChar || forceRefresh)
-            {
-                Console.SetCursorPosition(x, y);
-                Console.CursorVisible = false;
-                Console.Write(newChar);
+                    return new ConsoleTile();
             }
         }
 
-        protected override async Task DrawEntityAsync(int x, int y, bool forceRefresh)
+        protected override async Task DrawTile(int x, int y)
         {
-            char oldChar = Buffer[x, y];
-            char newChar = '@';
-
-            Buffer[x, y] = newChar;
-
-            if (oldChar != newChar || forceRefresh)
-            {
-                Console.SetCursorPosition(x, y);
-                Console.CursorVisible = false;
-                Console.Write(newChar);
-            }
+            Console.SetCursorPosition(x, y);
+            Console.CursorVisible = false;
+            Console.BackgroundColor = TileBuffer[x, y].BackgroundColor;
+            Console.ForegroundColor = TileBuffer[x, y].ForegroundColor;
+            Console.Write(TileBuffer[x, y].Char);
         }
     }
 }

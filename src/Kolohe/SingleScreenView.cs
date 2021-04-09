@@ -5,21 +5,24 @@ using System.Threading.Tasks;
 
 namespace Kolohe
 {
-    public abstract class SingleScreenView : IView
+    public abstract class SingleScreenView<T> : IView where T : ISingleScreenTile
     {
         public int ScreenWidth { get; private set; }
 
         public int ScreenHeight { get; private set; }
+
+        public T?[,] TileBuffer { get; protected set; }
 
         public SingleScreenView(int width, int height)
         {
             Resize(width, height);
         }
 
-        public virtual void Resize(int width, int height)
+        public void Resize(int width, int height)
         {
             ScreenWidth = width;
             ScreenHeight = height;
+            TileBuffer = new T?[width, height];
         }
 
         public virtual async Task<EngineInput> ReadInputAsync() => EngineInput.None;
@@ -34,10 +37,15 @@ namespace Kolohe
                 {
                     if (x < Map.MapWidth && y < Map.MapHeight)
                     {
-                        await DrawMapTileAsync(x, y, engine.Map[x, y], forceRefresh);
-                        if (x == engine.Player.X && y == engine.Player.Y)
+                        var oldTile = TileBuffer[x, y];
+
+                        var newTile = GetTile(engine.Map[x, y], x == engine.Player.X && y == engine.Player.Y);
+
+                        TileBuffer[x, y] = newTile;
+
+                        if (oldTile is null || !oldTile.Equals(newTile) || forceRefresh)
                         {
-                            await DrawEntityAsync(x, y, forceRefresh);
+                            await DrawTile(x, y);
                         }
                     }
                 }
@@ -46,8 +54,10 @@ namespace Kolohe
 
         protected virtual bool SyncScreenDimensions() => false;
 
-        protected virtual async Task DrawMapTileAsync(int x, int y, MapTile tile, bool forceRefresh) { }
+        protected virtual T GetTile(MapTile mapTile, bool player) => default;
 
-        protected virtual async Task DrawEntityAsync(int x, int y, bool forceRefresh) { }
+        protected virtual async Task DrawTile(int x, int y) { }
+
+        
     }
 }
