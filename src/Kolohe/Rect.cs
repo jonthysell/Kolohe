@@ -1,67 +1,70 @@
 ﻿// Copyright(c) Jon Thysell<http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
+
 namespace Kolohe
 {
-    public readonly struct Rect
+    public class Rect
     {
         public readonly int X;
         public readonly int Y;
         public readonly int Width;
         public readonly int Height;
 
+        public int MaxX => X + Width - 1;
+        public int MaxY => Y + Height - 1;
+
         public Rect(int x, int y, int width, int height)
         {
             X = x;
             Y = y;
-            Width = width;
-            Height = height;
+            Width = width > 0 ? width : throw new ArgumentOutOfRangeException(nameof(width));
+            Height = height > 0 ? height : throw new ArgumentOutOfRangeException(nameof(height));
         }
 
-        public bool WithinWidth(int x)
+        public Rect(int width, int height) : this(0, 0, width, height) { }
+
+        public bool Contains(int x, int y)
         {
-            return x >= X && x < (X + Width);
+            return x >= X && x <= MaxX && y >= Y && y <= MaxY;
         }
 
-        public bool LeftEdge(int x)
+        public bool Contains(Rect rect)
         {
-            return x == X;
+            return Contains(rect.X, rect.Y) && Contains(rect.MaxX, rect.MaxY);
         }
 
-        public bool RightEdge(int x)
+        public void ForEach(Action<int, int> action)
         {
-            return x == X + Width - 1;
+            for (int x = X; x <= MaxX; x++)
+            {
+                for (int y = Y; y <= MaxY; y++)
+                {
+                    action(x, y);
+                }
+            }
         }
 
-        public bool TopEdge(int y)
+        public Rect Grow(int amount)
         {
-            return y == Y;
+            return new Rect(X - amount, Y - amount, Width + (2 * amount), Height + (2 * amount));
         }
 
-        public bool BottomEdge(int y)
+        public Rect Shrink(int amount)
         {
-            return y == Y + Height - 1;
+            return new Rect(X + amount, Y + amount, Width - (2 * amount), Height - (2 * amount));
         }
 
-        public bool WithinHeight(int y)
+        public static Rect RandomRect(Random random, int minX, int maxX, int minY, int maxY, int minWidth, int maxWidth, int minHeight, int maxHeight)
         {
-            return y >= Y && y < (Y + Height);
-        }
+            int x = random.Next(minX, maxX + 1);
+            int y = random.Next(minY, maxY + 1);
 
-        public bool Within(int x, int y)
-        {
-            return WithinWidth(x) && WithinHeight(y);
-        }
+            int width = random.Next(minWidth, maxWidth + 1);
+            int height = random.Next(minHeight, maxHeight + 1);
 
-        public bool PointOnEdge(int x, int y)
-        {
-            return ((LeftEdge(x) || RightEdge(x)) && WithinHeight(y))
-                || ((TopEdge(y) || BottomEdge(y)) && WithinWidth(x));
-        }
-
-        public bool PointOnCorner(int x, int y)
-        {
-            return (LeftEdge(x) || RightEdge(x)) && (TopEdge(y) || BottomEdge(y));
+            return new Rect(x, y, width, height);
         }
     }
 }

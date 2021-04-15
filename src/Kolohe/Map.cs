@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+
 namespace Kolohe
 {
-    public class Map
+    public class Map : Rect
     {
         public MapTile this[int x, int y]
         {
@@ -17,42 +20,61 @@ namespace Kolohe
             }
         }
 
-        private readonly MapTile[,] _tiles = new MapTile[MapWidth, MapHeight];
+        private readonly MapTile[,] _tiles;
 
-        public const int MapWidth = 20;
-        public const int MapHeight = 10;
-
-        public bool Within(int x, int y)
+        public Map(int width, int height) : base(width, height)
         {
-            return x >= 0 && x < MapWidth && y >= 0 && y < MapHeight;
+            _tiles = new MapTile[width, height];
         }
 
-        public static Map GetStaticMap()
+        public static Map GenerateWorldMap(Random random)
         {
-            var map = new Map();
+            var map = new Map(Constants.WorldMapWidth, Constants.WorldMapHeight);
 
-            var innerRect = new Rect(2, 2, 4, 4);
-
-            for (int x = 0; x < MapWidth; x++)
+            for (int x = 0; x < map.Width; x++)
             {
-                for (int y = 0; y < MapHeight; y++)
+                for (int y = 0; y < map.Height; y++)
                 {
-                    if (x == 0 || x == MapWidth - 1 || y == 0 || y == MapHeight - 1)
-                    {
-                        map[x, y] = MapTile.Wall;
-                    }
-                    else if (innerRect.PointOnEdge(x, y))
-                    {
-                        map[x, y] = MapTile.Wall;
-                    }
-                    else if (!innerRect.Within(x, y))
-                    {
-                        map[x, y] = MapTile.Floor;
-                    }
+                    map[x, y] = MapTile.Ocean;
+                }
+            }
+
+            int islands = 0;
+            while (islands < Constants.WorldIslandCount)
+            {
+                if (TryAddIsland(map, random))
+                {
+                    islands++;
                 }
             }
 
             return map;
+        }
+
+        private static bool TryAddIsland(Map map, Random random)
+        {
+            var islandRect = RandomRect(random, 0, map.Width, 0, map.Height, Constants.MinIslandSize, Constants.MaxIslandSize, Constants.MinIslandSize, Constants.MaxIslandSize);
+            var bufferRect = islandRect.Grow(Constants.MinIslandDistance);
+
+            if (map.Contains(bufferRect))
+            {
+                bool isClear = true;
+                bufferRect.ForEach((x, y) =>
+                {
+                    isClear = isClear && map[x, y] == MapTile.Ocean;
+                });
+
+                if (isClear)
+                {
+                    islandRect.ForEach((x, y) =>
+                    {
+                        map[x, y] = MapTile.Sand;
+                    });
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

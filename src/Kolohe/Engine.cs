@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,17 +17,20 @@ namespace Kolohe
 
         public int Time { get; private set; }
 
+        private readonly Random _gameSeed = new Random();
+        private readonly Random _playerSeed = new Random();
+
         public Engine(IView view)
         {
             View = view;
 
             Player = new Player();
-            Map = Map.GetStaticMap();
+            Map = Map.GenerateWorldMap(_gameSeed);
 
             Time = 0;
 
-            Player.X = Map.MapWidth / 2;
-            Player.Y = Map.MapHeight / 2;
+            Player.X = 2;
+            Player.Y = 2;
         }
 
         public async Task RefreshViewAsync()
@@ -70,9 +74,9 @@ namespace Kolohe
             int targetX = Player.X + _directionDelta[(int)direction][0];
             int targetY = Player.Y + _directionDelta[(int)direction][1];
 
-            if (Map.Within(targetX, targetY))
+            if (Map.Contains(targetX, targetY))
             {
-                if (Map[targetX, targetY] == MapTile.Floor)
+                if (Map[targetX, targetY] != MapTile.None)
                 {
                     // Clear movement
                     Player.X = targetX;

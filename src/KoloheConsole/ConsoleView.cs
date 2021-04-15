@@ -8,13 +8,27 @@ namespace Kolohe.CLI
 {
     class ConsoleView : SingleScreenView<ConsoleTile>
     {
+        public readonly ConsoleTile DefaultTile;
+        
         public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight)
         {
             Console.CursorVisible = false;
+            Console.ResetColor();
+            DefaultTile = new ConsoleTile()
+            {
+                Char = ' ',
+                BackgroundColor = Console.BackgroundColor,
+                ForegroundColor = Console.ForegroundColor,
+            };
         }
 
         public override async Task<EngineInput> ReadInputAsync()
         {
+            if (!Console.KeyAvailable)
+            {
+                await Task.Yield();
+            }
+
             var input = Console.ReadKey(true);
 
             switch (input.Key)
@@ -69,38 +83,45 @@ namespace Kolohe.CLI
 
         protected override ConsoleTile GetTile(MapTile mapTile, bool player)
         {
-            if (player)
-            {
-                return new ConsoleTile()
-                {
-                    Char = '@',
-                };
-            }
+            var consoleTile = new ConsoleTile();
 
             switch (mapTile)
             {
-                case MapTile.Floor:
-                    return new ConsoleTile()
-                    {
-                        Char = '.',
-                    };
-                case MapTile.Wall:
-                    return new ConsoleTile()
-                    {
-                        Char = '#',
-                    };
+                case MapTile.Ocean:
+                    consoleTile.BackgroundColor = ConsoleColor.DarkBlue;
+                    break;
+                case MapTile.Sand:
+                    consoleTile.BackgroundColor = ConsoleColor.DarkYellow;
+                    break;
                 default:
                     return new ConsoleTile();
             }
+
+            if (player)
+            {
+                consoleTile.Char = '@';
+                consoleTile.ForegroundColor = ConsoleColor.Green;
+            }
+
+            return consoleTile;
         }
 
-        protected override async Task DrawTile(int x, int y)
+        protected override async Task ClearScreenAsync()
         {
-            Console.SetCursorPosition(x, y);
+            Console.ResetColor();
+            Console.Clear();
+        }
+
+        protected override async Task DrawTileAsync(int x, int y)
+        {
             Console.CursorVisible = false;
-            Console.BackgroundColor = TileBuffer[x, y].BackgroundColor;
-            Console.ForegroundColor = TileBuffer[x, y].ForegroundColor;
-            Console.Write(TileBuffer[x, y].Char);
+            Console.SetCursorPosition(x, y);
+
+            var tile = TileBuffer[x, y] ?? DefaultTile;
+
+            Console.BackgroundColor = tile.BackgroundColor;
+            Console.ForegroundColor = tile.ForegroundColor;
+            Console.Write(tile.Char);
         }
     }
 }
