@@ -12,9 +12,11 @@ namespace Kolohe.CLI
 
         static void Main(string[] args)
         {
-            Console.CancelKeyPress += Console_CancelKeyPress;
+            Console.TreatControlCAsInput = true;
             Console.CursorVisible = false;
             Console.ResetColor();
+
+            Console.Title = AppInfo.Name;
 
             var view = new ConsoleView();
             var engine = new Engine(view);
@@ -25,12 +27,6 @@ namespace Kolohe.CLI
             Console.CursorVisible = true;
             Console.ResetColor();
             Console.Clear();
-        }
-
-        private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
-        {
-            _cts.Cancel();
-            e.Cancel = true;
         }
     }
 }

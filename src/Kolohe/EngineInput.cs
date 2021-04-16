@@ -28,5 +28,6 @@ namespace Kolohe
         ModifiedDirectionUpLeft,
         ModifiedDirectionCenter,
         RefreshView,
+        HaltEngine,
     }
 }

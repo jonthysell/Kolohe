@@ -20,6 +20,8 @@ namespace Kolohe
         private readonly Random _gameSeed = new Random();
         private readonly Random _playerSeed = new Random();
 
+        private bool _exitRequested = false;
+
         public Engine(IView view)
         {
             View = view;
@@ -40,12 +42,12 @@ namespace Kolohe
 
         public async Task StartAsync(CancellationToken token)
         {
-            await View.UpdateViewAsync(this, EngineInput.RefreshView);
-            while (!token.IsCancellationRequested)
+            var input = EngineInput.RefreshView;
+            while (!token.IsCancellationRequested && !_exitRequested)
             {
-                var input = await View.ReadInputAsync();
-                ProcessInput(input);
                 await View.UpdateViewAsync(this, input);
+                input = await View.ReadInputAsync();
+                ProcessInput(input);
             }
         }
 
@@ -65,6 +67,9 @@ namespace Kolohe
                     break;
                 case EngineInput.DirectionCenter:
                     Step();
+                    break;
+                case EngineInput.HaltEngine:
+                    _exitRequested = true;
                     break;
             }
         }

@@ -42,6 +42,8 @@ namespace Kolohe.CLI
                     return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionCenter : EngineInput.DirectionCenter;
                 case ConsoleKey.R:
                     return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.RefreshView : EngineInput.None;
+                case ConsoleKey.C:
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.HaltEngine : EngineInput.None;
             }
 
             return EngineInput.None;
