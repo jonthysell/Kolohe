@@ -87,7 +87,7 @@ namespace Kolohe
                 await ClearScreenAsync();
             }
 
-            for (int screenY = 0; screenY < ScreenBounds.Height; screenY++)
+            for (int screenY = ScreenBounds.Height - 1; screenY >= 0; screenY--)
             {
                 for (int screenX = 0; screenX < ScreenBounds.Width; screenX++)
                 {
