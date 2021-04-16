@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kolohe
@@ -87,27 +88,24 @@ namespace Kolohe
                 await ClearScreenAsync();
             }
 
-            for (int screenY = ScreenBounds.Height - 1; screenY >= 0; screenY--)
+            foreach ((int screenX, int screenY) in GetScreenCoordinatesEnumerable())
             {
-                for (int screenX = 0; screenX < ScreenBounds.Width; screenX++)
+                T? oldTile = TileBuffer[screenX, screenY];
+                T? newTile = null;
+
+                if (MapWindow.Contains(screenX, screenY))
                 {
-                    T? oldTile = TileBuffer[screenX, screenY];
-                    T? newTile = null;
+                    // Get map tile
+                    int mapX = screenX - MapWindow.X + MapCameraXOffset;
+                    int mapY = screenY - MapWindow.Y + MapCameraYOffset;
 
-                    if (MapWindow.Contains(screenX, screenY))
-                    {
-                        // Get map tile
-                        int mapX = screenX - MapWindow.X + MapCameraXOffset;
-                        int mapY = screenY - MapWindow.Y + MapCameraYOffset;
+                    newTile = engine.Map.Contains(mapX, mapY) ? GetMapTile(engine.Map[mapX, mapY], mapX == engine.Player.X && mapY == engine.Player.Y) : null;
+                }
 
-                        newTile = engine.Map.Contains(mapX, mapY) ? GetMapTile(engine.Map[mapX, mapY], mapX == engine.Player.X && mapY == engine.Player.Y) : null;
-                    }
-
-                    if (forceRefresh || (oldTile is not null && !oldTile.Equals(newTile)) || (newTile is not null && !newTile.Equals(oldTile)))
-                    {
-                        TileBuffer[screenX, screenY] = newTile;
-                        await DrawScreenTileAsync(screenX, screenY);
-                    }
+                if (forceRefresh || (oldTile is not null && !oldTile.Equals(newTile)) || (newTile is not null && !newTile.Equals(oldTile)))
+                {
+                    TileBuffer[screenX, screenY] = newTile;
+                    await DrawScreenTileAsync(screenX, screenY);
                 }
             }
         }
@@ -125,6 +123,18 @@ namespace Kolohe
         protected virtual async Task ClearScreenAsync()
         {
             await Task.Yield();
+        }
+
+        protected virtual IEnumerable<(int, int)> GetScreenCoordinatesEnumerable()
+        {
+            // Default to process screen coordinates is top left to bottom right
+            for (int y = 0; y < ScreenBounds.Height; y++)
+            {
+                for (int x = 0; x < ScreenBounds.Width; x++)
+                {
+                    yield return (x, y);
+                }
+            }
         }
 
         protected virtual async Task DrawScreenTileAsync(int x, int y)

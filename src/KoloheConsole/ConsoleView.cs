@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kolohe.CLI
@@ -100,6 +101,19 @@ namespace Kolohe.CLI
             Console.BackgroundColor = DefaultTile.BackgroundColor;
             Console.ForegroundColor = DefaultTile.ForegroundColor;
             Console.Clear();
+        }
+
+        protected override IEnumerable<(int, int)> GetScreenCoordinatesEnumerable()
+        {
+            // Some consoles get weird artifacts when rendering top down so we work
+            // around it by rendering bottom up
+            for (int y = ScreenBounds.Height - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < ScreenBounds.Width; x++)
+                {
+                    yield return (x, y);
+                }
+            }
         }
 
         protected override async Task DrawScreenTileAsync(int x, int y)
