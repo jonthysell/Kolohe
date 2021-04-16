@@ -16,14 +16,14 @@ namespace Kolohe
         public SingleScreenView(int width, int height)
         {
             ScreenBounds = new Rect(width, height);
-            MapWindow = new Rect(width, height);
+            MapWindow = ScreenBounds.Shrink(1);
             TileBuffer = new T[width, height];
         }
 
         public void Resize(int width, int height)
         {
             ScreenBounds = new Rect(width, height);
-            MapWindow = new Rect(width, height);
+            MapWindow = ScreenBounds.Shrink(1);
             TileBuffer = new T[width, height];
         }
 
@@ -42,30 +42,27 @@ namespace Kolohe
                 await ClearScreenAsync();
             }
 
-            for (int x = 0; x < ScreenBounds.Width; x++)
+            for (int screenY = 0; screenY < ScreenBounds.Height; screenY++)
             {
-                for (int y = 0; y < ScreenBounds.Height; y++)
+                for (int screenX = 0; screenX < ScreenBounds.Width; screenX++)
                 {
-                    var oldTile = TileBuffer[x, y];
-                    var newTile = TileBuffer[x, y];
+                    var oldTile = TileBuffer[screenX, screenY];
+                    var newTile = TileBuffer[screenX, screenY];
 
-                    if (MapWindow.Contains(x, y))
+                    if (MapWindow.Contains(screenX, screenY))
                     {
                         // Draw Map
-                        int xOffset = 0;
-                        int yOffset = 0;
+                        int mx = screenX - MapWindow.X;
+                        int my = screenY - MapWindow.Y;
 
-                        int mx = x + xOffset;
-                        int my = y + yOffset;
-
-                        newTile = engine.Map.Contains(mx, my) ? GetTile(engine.Map[mx, my], mx == engine.Player.X && my == engine.Player.Y) : null;
+                        newTile = engine.Map.Contains(mx, my) ? GetMapTile(engine.Map[mx, my], mx == engine.Player.X && my == engine.Player.Y) : null;
                     }
                     
-                    TileBuffer[x, y] = newTile;
+                    TileBuffer[screenX, screenY] = newTile;
 
                     if ((oldTile is not null && !oldTile.Equals(newTile)) || forceRefresh)
                     {
-                        await DrawTileAsync(x, y);
+                        await DrawScreenTileAsync(screenX, screenY);
                     }
                 }
             }
@@ -76,7 +73,7 @@ namespace Kolohe
             return false;
         }
 
-        protected virtual T? GetTile(MapTile mapTile, bool player)
+        protected virtual T? GetMapTile(MapTile mapTile, bool player)
         {
             return null;
         }
@@ -86,7 +83,7 @@ namespace Kolohe
             await Task.Yield();
         }
 
-        protected virtual async Task DrawTileAsync(int x, int y)
+        protected virtual async Task DrawScreenTileAsync(int x, int y)
         {
             await Task.Yield();
         }

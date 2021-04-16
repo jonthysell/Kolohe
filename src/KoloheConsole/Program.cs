@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Kolohe.CLI
 {
@@ -14,12 +13,18 @@ namespace Kolohe.CLI
         static void Main(string[] args)
         {
             Console.CancelKeyPress += Console_CancelKeyPress;
+            Console.CursorVisible = false;
+            Console.ResetColor();
 
             var view = new ConsoleView();
             var engine = new Engine(view);
 
             var task = engine.StartAsync(_cts.Token);
             task.Wait();
+
+            Console.CursorVisible = true;
+            Console.ResetColor();
+            Console.Clear();
         }
 
         private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)

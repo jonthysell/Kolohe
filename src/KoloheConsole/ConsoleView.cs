@@ -12,8 +12,6 @@ namespace Kolohe.CLI
         
         public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight)
         {
-            Console.CursorVisible = false;
-            Console.ResetColor();
             DefaultTile = new ConsoleTile()
             {
                 Char = ' ',
@@ -26,7 +24,7 @@ namespace Kolohe.CLI
         {
             if (!Console.KeyAvailable)
             {
-                await Task.Yield();
+                return EngineInput.None;
             }
 
             var input = Console.ReadKey(true);
@@ -81,7 +79,7 @@ namespace Kolohe.CLI
             return refresh;
         }
 
-        protected override ConsoleTile GetTile(MapTile mapTile, bool player)
+        protected override ConsoleTile GetMapTile(MapTile mapTile, bool player)
         {
             var consoleTile = new ConsoleTile();
 
@@ -112,7 +110,7 @@ namespace Kolohe.CLI
             Console.Clear();
         }
 
-        protected override async Task DrawTileAsync(int x, int y)
+        protected override async Task DrawScreenTileAsync(int x, int y)
         {
             Console.CursorVisible = false;
             Console.SetCursorPosition(x, y);
