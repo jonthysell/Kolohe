@@ -76,7 +76,9 @@ namespace Kolohe.CLI
                     consoleTile.BackgroundColor = ConsoleColor.DarkBlue;
                     break;
                 case MapTile.Sand:
-                    consoleTile.BackgroundColor = ConsoleColor.DarkYellow;
+                    consoleTile.Char = BlockChars.LightShade;
+                    consoleTile.BackgroundColor = ConsoleColor.Yellow;
+                    consoleTile.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
                 default:
                     return new ConsoleTile();

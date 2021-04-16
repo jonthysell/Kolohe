@@ -29,8 +29,8 @@ namespace Kolohe
 
             Time = 0;
 
-            Player.X = 0;
-            Player.Y = 0;
+            Player.X = Map.Width / 2;
+            Player.Y = Map.Height / 2;
         }
 
         public async Task RefreshViewAsync()
