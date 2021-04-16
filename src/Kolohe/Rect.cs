@@ -37,6 +37,12 @@ namespace Kolohe
             return Contains(rect.X, rect.Y) && Contains(rect.MaxX, rect.MaxY);
         }
 
+        public bool OnBorder(int x, int y)
+        {
+            var part = GetRectPart(x, y);
+            return part != RectPart.Inside && part != RectPart.Outside;
+        }
+
         public RectPart GetRectPart(int x, int y)
         {
             if (x == X)
@@ -45,22 +51,22 @@ namespace Kolohe
                 {
                     return RectPart.BorderTopLeft;
                 }
-                else if (y > Y && X < MaxY)
+                else if (y > Y && y < MaxY)
                 {
-                    return RectPart.Inside;
+                    return RectPart.BorderLeft;
                 }
                 else if (y == MaxY)
                 {
                     return RectPart.BorderBottomLeft;
                 }
             }
-            else if (x > X && X < MaxX)
+            else if (x > X && x < MaxX)
             {
                 if (y == Y)
                 {
                     return RectPart.BorderTop;
                 }
-                else if (y > Y && X < MaxY)
+                else if (y > Y && y < MaxY)
                 {
                     return RectPart.Inside;
                 }
@@ -75,9 +81,9 @@ namespace Kolohe
                 {
                     return RectPart.BorderTopRight;
                 }
-                else if (y > Y && X < MaxY)
+                else if (y > Y && y < MaxY)
                 {
-                    return RectPart.Inside;
+                    return RectPart.BorderRight;
                 }
                 else if (y == MaxY)
                 {
@@ -109,6 +115,11 @@ namespace Kolohe
             return new Rect(X - amount, Y - amount, Width + (2 * amount), Height + (2 * amount));
         }
 
+        public Rect Shift(int dx, int dy)
+        {
+            return new Rect(X + dx, Y + dy, Width, Height);
+        }
+
         public static Rect RandomRect(Random random, int minX, int maxX, int minY, int maxY, int minWidth, int maxWidth, int minHeight, int maxHeight)
         {
             int x = random.Next(minX, maxX + 1);
@@ -129,6 +140,7 @@ namespace Kolohe
         BorderBottomRight,
         BorderBottom,
         BorderBottomLeft,
+        BorderLeft,
         BorderTopLeft,
         Inside,
         Outside,

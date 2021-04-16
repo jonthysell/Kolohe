@@ -53,26 +53,12 @@ namespace Kolohe
 
         public async Task UpdateViewAsync(Engine engine, EngineInput input)
         {
+            // Re-sync the screen
             bool forceRefresh = SyncScreenDimensions() || input == EngineInput.RefreshView;
 
+            // Process input to re-center map
             switch (input)
             {
-                case EngineInput.DirectionUp:
-                    break;
-                case EngineInput.DirectionUpRight:
-                    break;
-                case EngineInput.DirectionRight:
-                    break;
-                case EngineInput.DirectionDownRight:
-                    break;
-                case EngineInput.DirectionDown:
-                    break;
-                case EngineInput.DirectionDownLeft:
-                    break;
-                case EngineInput.DirectionLeft:
-                    break;
-                case EngineInput.DirectionUpLeft:
-                    break;
                 case EngineInput.ModifiedDirectionUp:
                 case EngineInput.ModifiedDirectionUpRight:
                 case EngineInput.ModifiedDirectionRight:
@@ -86,6 +72,14 @@ namespace Kolohe
                 case EngineInput.ModifiedDirectionCenter:
                     CenterMapCamera(engine.Player.X, engine.Player.Y);
                     break;
+            }
+
+            // Move camera to keep player on screen
+            var playerBounds = MapWindow.Shift(MapCameraXOffset, MapCameraYOffset).ResizeFromCenter(-1);
+            if (playerBounds.GetRectPart(engine.Player.X, engine.Player.Y) != RectPart.Inside)
+            {
+                // TODO: Centering on player is aggressive but fine for now, replace with smoother pan
+                CenterMapCamera(engine.Player.X, engine.Player.Y);
             }
 
             if (forceRefresh)
