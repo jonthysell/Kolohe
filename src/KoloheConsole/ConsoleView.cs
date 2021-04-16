@@ -8,51 +8,38 @@ namespace Kolohe.CLI
 {
     class ConsoleView : SingleScreenView<ConsoleTile>
     {
-        public readonly ConsoleTile DefaultTile;
-        
-        public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight)
-        {
-            DefaultTile = new ConsoleTile()
-            {
-                Char = ' ',
-                BackgroundColor = Console.BackgroundColor,
-                ForegroundColor = Console.ForegroundColor,
-            };
-        }
+        public readonly ConsoleTile DefaultTile = new ConsoleTile();
+
+        public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight) { }
 
         public override async Task<EngineInput> ReadInputAsync()
         {
-            if (!Console.KeyAvailable)
-            {
-                return EngineInput.None;
-            }
-
             var input = Console.ReadKey(true);
 
             switch (input.Key)
             {
                 case ConsoleKey.NumPad8:
                 case ConsoleKey.UpArrow:
-                    return EngineInput.MoveUp;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUp : EngineInput.DirectionUp;
                 case ConsoleKey.NumPad9:
-                    return EngineInput.MoveUpRight;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUpRight : EngineInput.DirectionUpRight;
                 case ConsoleKey.NumPad6:
                 case ConsoleKey.RightArrow:
-                    return EngineInput.MoveRight;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionRight : EngineInput.DirectionRight;
                 case ConsoleKey.NumPad3:
-                    return EngineInput.MoveDownRight;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDownRight : EngineInput.DirectionDownRight;
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.DownArrow:
-                    return EngineInput.MoveDown;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDown : EngineInput.DirectionDown;
                 case ConsoleKey.NumPad1:
-                    return EngineInput.MoveDownLeft;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDownLeft : EngineInput.DirectionDownLeft;
                 case ConsoleKey.NumPad4:
                 case ConsoleKey.LeftArrow:
-                    return EngineInput.MoveLeft;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionLeft : EngineInput.DirectionLeft;
                 case ConsoleKey.NumPad7:
-                    return EngineInput.MoveUpLeft;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUpLeft : EngineInput.DirectionUpLeft;
                 case ConsoleKey.NumPad5:
-                    return EngineInput.Wait;
+                    return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionCenter : EngineInput.DirectionCenter;
                 case ConsoleKey.R:
                     return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.RefreshView : EngineInput.None;
             }
@@ -106,20 +93,24 @@ namespace Kolohe.CLI
 
         protected override async Task ClearScreenAsync()
         {
-            Console.ResetColor();
+            Console.BackgroundColor = DefaultTile.BackgroundColor;
+            Console.ForegroundColor = DefaultTile.ForegroundColor;
             Console.Clear();
         }
 
         protected override async Task DrawScreenTileAsync(int x, int y)
         {
             Console.CursorVisible = false;
-            Console.SetCursorPosition(x, y);
+            if (x < Console.BufferWidth && y < Console.BufferHeight)
+            {
+                Console.SetCursorPosition(x, y);
 
-            var tile = TileBuffer[x, y] ?? DefaultTile;
+                var tile = TileBuffer[x, y] ?? DefaultTile;
 
-            Console.BackgroundColor = tile.BackgroundColor;
-            Console.ForegroundColor = tile.ForegroundColor;
-            Console.Write(tile.Char);
+                Console.BackgroundColor = tile.BackgroundColor;
+                Console.ForegroundColor = tile.ForegroundColor;
+                Console.Write(tile.Char);
+            }
         }
     }
 }

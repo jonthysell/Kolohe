@@ -37,6 +37,57 @@ namespace Kolohe
             return Contains(rect.X, rect.Y) && Contains(rect.MaxX, rect.MaxY);
         }
 
+        public RectPart GetRectPart(int x, int y)
+        {
+            if (x == X)
+            {
+                if (y == Y)
+                {
+                    return RectPart.BorderTopLeft;
+                }
+                else if (y > Y && X < MaxY)
+                {
+                    return RectPart.Inside;
+                }
+                else if (y == MaxY)
+                {
+                    return RectPart.BorderBottomLeft;
+                }
+            }
+            else if (x > X && X < MaxX)
+            {
+                if (y == Y)
+                {
+                    return RectPart.BorderTop;
+                }
+                else if (y > Y && X < MaxY)
+                {
+                    return RectPart.Inside;
+                }
+                else if (y == MaxY)
+                {
+                    return RectPart.BorderBottom;
+                }
+            }
+            else if (x == MaxX)
+            {
+                if (y == Y)
+                {
+                    return RectPart.BorderTopRight;
+                }
+                else if (y > Y && X < MaxY)
+                {
+                    return RectPart.Inside;
+                }
+                else if (y == MaxY)
+                {
+                    return RectPart.BorderBottomRight;
+                }
+            }
+
+            return RectPart.Outside;
+        }
+
         public void ForEach(Action<int, int> action)
         {
             for (int x = X; x <= MaxX; x++)
@@ -48,14 +99,14 @@ namespace Kolohe
             }
         }
 
-        public Rect Grow(int amount)
+        public Rect Clone()
         {
-            return new Rect(X - amount, Y - amount, Width + (2 * amount), Height + (2 * amount));
+            return new Rect(X, Y, Width, Height);
         }
 
-        public Rect Shrink(int amount)
+        public Rect ResizeFromCenter(int amount)
         {
-            return new Rect(X + amount, Y + amount, Width - (2 * amount), Height - (2 * amount));
+            return new Rect(X - amount, Y - amount, Width + (2 * amount), Height + (2 * amount));
         }
 
         public static Rect RandomRect(Random random, int minX, int maxX, int minY, int maxY, int minWidth, int maxWidth, int minHeight, int maxHeight)
@@ -68,5 +119,18 @@ namespace Kolohe
 
             return new Rect(x, y, width, height);
         }
+    }
+
+    public enum RectPart
+    {
+        BorderTop,
+        BorderTopRight,
+        BorderRight,
+        BorderBottomRight,
+        BorderBottom,
+        BorderBottomLeft,
+        BorderTopLeft,
+        Inside,
+        Outside,
     }
 }

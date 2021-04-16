@@ -29,8 +29,8 @@ namespace Kolohe
 
             Time = 0;
 
-            Player.X = 2;
-            Player.Y = 2;
+            Player.X = 0;
+            Player.Y = 0;
         }
 
         public async Task RefreshViewAsync()
@@ -53,26 +53,27 @@ namespace Kolohe
         {
             switch (input)
             {
-                case EngineInput.MoveUp:
-                case EngineInput.MoveUpRight:
-                case EngineInput.MoveRight:
-                case EngineInput.MoveDownRight:
-                case EngineInput.MoveDown:
-                case EngineInput.MoveDownLeft:
-                case EngineInput.MoveLeft:
-                case EngineInput.MoveUpLeft:
-                    ProcessMove((Direction)input);
+                case EngineInput.DirectionUp:
+                case EngineInput.DirectionUpRight:
+                case EngineInput.DirectionRight:
+                case EngineInput.DirectionDownRight:
+                case EngineInput.DirectionDown:
+                case EngineInput.DirectionDownLeft:
+                case EngineInput.DirectionLeft:
+                case EngineInput.DirectionUpLeft:
+                    ProcessPlayerMove((Direction)((int)input - (int)EngineInput.DirectionUp));
                     break;
-                case EngineInput.Wait:
+                case EngineInput.DirectionCenter:
                     Step();
                     break;
             }
         }
 
-        private void ProcessMove(Direction direction)
+        private void ProcessPlayerMove(Direction direction)
         {
-            int targetX = Player.X + _directionDelta[(int)direction][0];
-            int targetY = Player.Y + _directionDelta[(int)direction][1];
+            (int dx, int dy) = direction.GetDeltas();
+            int targetX = Player.X + dx;
+            int targetY = Player.Y + dy;
 
             if (Map.Contains(targetX, targetY))
             {
@@ -90,17 +91,5 @@ namespace Kolohe
         {
             Time++;
         }
-
-        private static int[][] _directionDelta = new int[][]
-        {
-            new int[] { 0, -1 },
-            new int[] { 1, -1 },
-            new int[] { 1, 0 },
-            new int[] { 1, 1 },
-            new int[] { 0, 1 },
-            new int[] { -1, 1 },
-            new int[] { -1, 0 },
-            new int[] { -1, -1 },
-        };
     }
 }

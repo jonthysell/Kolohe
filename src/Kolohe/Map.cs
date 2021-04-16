@@ -53,7 +53,7 @@ namespace Kolohe
         private static bool TryAddIsland(Map map, Random random)
         {
             var islandRect = RandomRect(random, 0, map.Width, 0, map.Height, Constants.MinIslandSize, Constants.MaxIslandSize, Constants.MinIslandSize, Constants.MaxIslandSize);
-            var bufferRect = islandRect.Grow(Constants.MinIslandDistance);
+            var bufferRect = islandRect.ResizeFromCenter(Constants.MinIslandDistance);
 
             if (map.Contains(bufferRect))
             {

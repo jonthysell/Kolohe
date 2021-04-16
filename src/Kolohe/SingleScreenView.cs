@@ -1,30 +1,48 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
 using System.Threading.Tasks;
 
 namespace Kolohe
 {
-    public abstract class SingleScreenView<T> : IView where T : class, ISingleScreenTile
+    public abstract class SingleScreenView<T> : IView where T : class, ISingleScreenTile, IEquatable<T>
     {
         public Rect ScreenBounds { get; private set; }
 
         public Rect MapWindow { get; private set; }
+
+        public int MapCameraXOffset { get; private set; } = 0;
+
+        public int MapCameraYOffset { get; private set; } = 0;
 
         public T?[,] TileBuffer { get; protected set; }
 
         public SingleScreenView(int width, int height)
         {
             ScreenBounds = new Rect(width, height);
-            MapWindow = ScreenBounds.Shrink(1);
-            TileBuffer = new T[width, height];
+            MapWindow = ScreenBounds.ResizeFromCenter(-1);
+            TileBuffer = new T?[width, height];
         }
 
         public void Resize(int width, int height)
         {
             ScreenBounds = new Rect(width, height);
-            MapWindow = ScreenBounds.Shrink(1);
-            TileBuffer = new T[width, height];
+            MapWindow = ScreenBounds.ResizeFromCenter(-1);
+            TileBuffer = new T?[width, height];
+        }
+
+        public void MoveMapCamera(Direction direction)
+        {
+            (int dx, int dy) = direction.GetDeltas();
+            MapCameraXOffset += dx;
+            MapCameraYOffset += dy;
+        }
+
+        public void CenterMapCamera(int mapX, int mapY)
+        {
+            MapCameraXOffset = mapX - (MapWindow.Width / 2);
+            MapCameraYOffset = mapY - (MapWindow.Height / 2);
         }
 
         public virtual async Task<EngineInput> ReadInputAsync()
@@ -37,6 +55,39 @@ namespace Kolohe
         {
             bool forceRefresh = SyncScreenDimensions() || input == EngineInput.RefreshView;
 
+            switch (input)
+            {
+                case EngineInput.DirectionUp:
+                    break;
+                case EngineInput.DirectionUpRight:
+                    break;
+                case EngineInput.DirectionRight:
+                    break;
+                case EngineInput.DirectionDownRight:
+                    break;
+                case EngineInput.DirectionDown:
+                    break;
+                case EngineInput.DirectionDownLeft:
+                    break;
+                case EngineInput.DirectionLeft:
+                    break;
+                case EngineInput.DirectionUpLeft:
+                    break;
+                case EngineInput.ModifiedDirectionUp:
+                case EngineInput.ModifiedDirectionUpRight:
+                case EngineInput.ModifiedDirectionRight:
+                case EngineInput.ModifiedDirectionDownRight:
+                case EngineInput.ModifiedDirectionDown:
+                case EngineInput.ModifiedDirectionDownLeft:
+                case EngineInput.ModifiedDirectionLeft:
+                case EngineInput.ModifiedDirectionUpLeft:
+                    MoveMapCamera((Direction)((int)input - (int)EngineInput.ModifiedDirectionUp));
+                    break;
+                case EngineInput.ModifiedDirectionCenter:
+                    CenterMapCamera(engine.Player.X, engine.Player.Y);
+                    break;
+            }
+
             if (forceRefresh)
             {
                 await ClearScreenAsync();
@@ -46,22 +97,21 @@ namespace Kolohe
             {
                 for (int screenX = 0; screenX < ScreenBounds.Width; screenX++)
                 {
-                    var oldTile = TileBuffer[screenX, screenY];
-                    var newTile = TileBuffer[screenX, screenY];
+                    T? oldTile = TileBuffer[screenX, screenY];
+                    T? newTile = null;
 
                     if (MapWindow.Contains(screenX, screenY))
                     {
-                        // Draw Map
-                        int mx = screenX - MapWindow.X;
-                        int my = screenY - MapWindow.Y;
+                        // Get map tile
+                        int mapX = screenX - MapWindow.X + MapCameraXOffset;
+                        int mapY = screenY - MapWindow.Y + MapCameraYOffset;
 
-                        newTile = engine.Map.Contains(mx, my) ? GetMapTile(engine.Map[mx, my], mx == engine.Player.X && my == engine.Player.Y) : null;
+                        newTile = engine.Map.Contains(mapX, mapY) ? GetMapTile(engine.Map[mapX, mapY], mapX == engine.Player.X && mapY == engine.Player.Y) : null;
                     }
-                    
-                    TileBuffer[screenX, screenY] = newTile;
 
-                    if ((oldTile is not null && !oldTile.Equals(newTile)) || forceRefresh)
+                    if (forceRefresh || (oldTile is not null && !oldTile.Equals(newTile)) || (newTile is not null && !newTile.Equals(oldTile)))
                     {
+                        TileBuffer[screenX, screenY] = newTile;
                         await DrawScreenTileAsync(screenX, screenY);
                     }
                 }
