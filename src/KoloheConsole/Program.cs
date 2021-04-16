@@ -16,7 +16,7 @@ namespace Kolohe.CLI
             Console.CursorVisible = false;
             Console.ResetColor();
 
-            Console.Title = AppInfo.Name;
+            Console.Title = $"{AppInfo.Name} v{AppInfo.Version}";
 
             var view = new ConsoleView();
             var engine = new Engine(view);
