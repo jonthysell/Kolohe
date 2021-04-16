@@ -15,6 +15,8 @@ namespace Kolohe
         public int MaxX => X + Width - 1;
         public int MaxY => Y + Height - 1;
 
+        public int Area => Width * Height;
+
         public Rect(int x, int y, int width, int height)
         {
             X = x;

@@ -100,7 +100,7 @@ namespace Kolohe
             new int[] { 0, 1 },
             new int[] { -1, 1 },
             new int[] { -1, 0 },
-            new int[] { -1, 1 },
+            new int[] { -1, -1 },
         };
     }
 }

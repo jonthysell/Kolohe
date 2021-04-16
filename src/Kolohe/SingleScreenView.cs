@@ -7,23 +7,23 @@ namespace Kolohe
 {
     public abstract class SingleScreenView<T> : IView where T : class, ISingleScreenTile
     {
-        public int ScreenWidth { get; private set; }
+        public Rect ScreenBounds { get; private set; }
 
-        public int ScreenHeight { get; private set; }
+        public Rect MapWindow { get; private set; }
 
         public T?[,] TileBuffer { get; protected set; }
 
         public SingleScreenView(int width, int height)
         {
-            ScreenWidth = width;
-            ScreenHeight = height;
+            ScreenBounds = new Rect(width, height);
+            MapWindow = new Rect(width, height);
             TileBuffer = new T[width, height];
         }
 
         public void Resize(int width, int height)
         {
-            ScreenWidth = width;
-            ScreenHeight = height;
+            ScreenBounds = new Rect(width, height);
+            MapWindow = new Rect(width, height);
             TileBuffer = new T[width, height];
         }
 
@@ -42,22 +42,30 @@ namespace Kolohe
                 await ClearScreenAsync();
             }
 
-            for (int x = 0; x < ScreenWidth; x++)
+            for (int x = 0; x < ScreenBounds.Width; x++)
             {
-                for (int y = 0; y < ScreenHeight; y++)
+                for (int y = 0; y < ScreenBounds.Height; y++)
                 {
-                    if (x < engine.Map.Width && y < engine.Map.Height)
+                    var oldTile = TileBuffer[x, y];
+                    var newTile = TileBuffer[x, y];
+
+                    if (MapWindow.Contains(x, y))
                     {
-                        var oldTile = TileBuffer[x, y];
+                        // Draw Map
+                        int xOffset = 0;
+                        int yOffset = 0;
 
-                        var newTile = engine.Map.Contains(x, y) ? GetTile(engine.Map[x, y], x == engine.Player.X && y == engine.Player.Y) : null;
+                        int mx = x + xOffset;
+                        int my = y + yOffset;
 
-                        TileBuffer[x, y] = newTile;
+                        newTile = engine.Map.Contains(mx, my) ? GetTile(engine.Map[mx, my], mx == engine.Player.X && my == engine.Player.Y) : null;
+                    }
+                    
+                    TileBuffer[x, y] = newTile;
 
-                        if (oldTile is null || !oldTile.Equals(newTile) || forceRefresh)
-                        {
-                            await DrawTileAsync(x, y);
-                        }
+                    if ((oldTile is not null && !oldTile.Equals(newTile)) || forceRefresh)
+                    {
+                        await DrawTileAsync(x, y);
                     }
                 }
             }

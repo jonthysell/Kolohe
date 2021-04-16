@@ -65,7 +65,7 @@ namespace Kolohe.CLI
         protected override bool SyncScreenDimensions()
         {
             bool refresh = false;
-            if (Console.WindowWidth != ScreenWidth || Console.WindowHeight != ScreenHeight)
+            if (Console.WindowWidth != ScreenBounds.Width || Console.WindowHeight != ScreenBounds.Height)
             {
                 Resize(Console.WindowWidth, Console.WindowHeight);
                 refresh = true;
