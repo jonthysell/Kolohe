@@ -5,6 +5,7 @@
     <AssemblyName>KoloheGUI</AssemblyName>
     <RootNamespace>Kolohe.GUI</RootNamespace>
     <Nullable>enable</Nullable>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.0" />

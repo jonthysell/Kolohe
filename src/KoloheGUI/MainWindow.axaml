@@ -1,9 +1,15 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window Title="KoloheGUI"
+        d:DesignHeight="600"
+        d:DesignWidth="800"
+        MinWidth="640"
+        MinHeight="480"
+        mc:Ignorable="d"
+        x:Class="Kolohe.GUI.MainWindow"
+        xmlns="https://github.com/avaloniaui"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Kolohe.GUI.MainWindow"
-        Title="KoloheGUI">
-    Welcome to Kolohe!
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Panel>
+    
+  </Panel>
 </Window>
