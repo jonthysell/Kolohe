@@ -35,9 +35,9 @@ namespace Kolohe
             Player.Y = Map.Height / 2;
         }
 
-        public async Task RefreshViewAsync()
+        public void Halt()
         {
-            await View.UpdateViewAsync(this, EngineInput.RefreshView);
+            _exitRequested = true;
         }
 
         public async Task StartAsync(CancellationToken token)
@@ -45,8 +45,8 @@ namespace Kolohe
             var input = EngineInput.RefreshView;
             while (!token.IsCancellationRequested && !_exitRequested)
             {
-                await View.UpdateViewAsync(this, input);
-                input = await View.ReadInputAsync();
+                await View.UpdateViewAsync(this, input, token);
+                input = await View.ReadInputAsync(token);
                 ProcessInput(input);
             }
         }

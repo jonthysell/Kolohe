@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kolohe
@@ -46,13 +47,13 @@ namespace Kolohe
             MapCameraYOffset = mapY - (MapWindow.Height / 2);
         }
 
-        public virtual async Task<EngineInput> ReadInputAsync()
+        public virtual async Task<EngineInput> ReadInputAsync(CancellationToken token)
         {
             await Task.Yield();
             return EngineInput.None;
         }
 
-        public async Task UpdateViewAsync(Engine engine, EngineInput input)
+        public async Task UpdateViewAsync(Engine engine, EngineInput input, CancellationToken token)
         {
             // Re-sync the screen
             bool forceRefresh = SyncScreenDimensions() || input == EngineInput.RefreshView;

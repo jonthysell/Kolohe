@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kolohe.CLI
@@ -13,7 +14,7 @@ namespace Kolohe.CLI
 
         public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight) { }
 
-        public override async Task<EngineInput> ReadInputAsync()
+        public override async Task<EngineInput> ReadInputAsync(CancellationToken token)
         {
             return await Task.Run(() =>
             {

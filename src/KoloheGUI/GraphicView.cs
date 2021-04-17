@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
-using System;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 
+using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 
 namespace Kolohe.GUI
@@ -12,12 +15,40 @@ namespace Kolohe.GUI
     {
         public readonly GraphicTile DefaultTile = new GraphicTile();
 
-        public GraphicView(int width, int height) : base(width, height) { }
+        private readonly MainWindow _mainWindow;
 
-        public override async Task<EngineInput> ReadInputAsync()
+        private readonly ConcurrentQueue<KeyEventArgs> _inputQueue = new ConcurrentQueue<KeyEventArgs>();
+
+        public GraphicView(MainWindow mainWindow, int width, int height) : base(width, height)
         {
-            return await Task.Run(() =>
+            _mainWindow = mainWindow;
+            _mainWindow.KeyDown += MainWindow_KeyDown;
+        }
+
+        private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
+        {
+            _inputQueue.Enqueue(e);
+        }
+
+        public override async Task<EngineInput> ReadInputAsync(CancellationToken token)
+        {
+            return await Task.Run(async () =>
             {
+                KeyEventArgs? input = null;
+                while (!token.IsCancellationRequested && !_inputQueue.TryDequeue(out input))
+                {
+                    await Task.Yield();
+                }
+
+                if (input is not null)
+                {
+                    switch (input.Key)
+                    {
+                        default:
+                            return EngineInput.HaltEngine;
+                    }
+                }
+
                 return EngineInput.None;
             });
         }

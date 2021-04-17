@@ -1,13 +1,15 @@
 // Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
+using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-
-using Kolohe;
+using Avalonia.Threading;
 
 namespace Kolohe.GUI
 {
@@ -15,11 +17,11 @@ namespace Kolohe.GUI
     {
         public static new App Current => (App)Application.Current;
 
-        public readonly CancellationTokenSource EngineCTS = new CancellationTokenSource();
+        private Engine? _engine;
+        public GraphicView? _graphicView;
 
-        public readonly GraphicView GraphicView = new GraphicView(80, 24);
-
-        public Engine? Engine { get; private set; }
+        private Task? _engineTask;
+        private readonly CancellationTokenSource _engineCTS = new CancellationTokenSource();
 
         public override void Initialize()
         {
@@ -41,13 +43,47 @@ namespace Kolohe.GUI
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                Engine = new Engine(GraphicView);
-                desktop.MainWindow = new MainWindow();
+                var window = new MainWindow();
+                _graphicView = new GraphicView(window, 80, 24);
+                _engine = new Engine(_graphicView);
+
+                window.Opened += Window_Opened;
+                window.Closing += Window_Closing;
+
+                desktop.MainWindow = window;
             }
         }
 
         private void Desktop_Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
         {
+        }
+
+        private void Window_Opened(object? sender, EventArgs e)
+        {
+            _engineTask = Task.Run(async () =>
+            {
+                if (_engine is not null)
+                {
+                    await _engine.StartAsync(_engineCTS.Token);    
+                }
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                    {
+                        desktop.MainWindow.Closing -= Window_Closing;
+                        desktop.MainWindow.Close();
+                    }
+                });
+            });
+        }
+
+        private void Window_Closing(object? sender, CancelEventArgs e)
+        {
+            _engineCTS.Cancel();
+            _engine?.Halt();
+            _engineTask?.Wait();
+            e.Cancel = true;
         }
     }
 }
