@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace Kolohe
         public int MapCameraYOffset { get; private set; } = 0;
 
         public T?[,] TileBuffer { get; protected set; }
+
+        public readonly ConcurrentQueue<EngineInput> InputBuffer = new ConcurrentQueue<EngineInput>();
 
         public SingleScreenView(int width, int height)
         {
@@ -47,10 +50,15 @@ namespace Kolohe
             MapCameraYOffset = mapY - (MapWindow.Height / 2);
         }
 
-        public virtual async Task<EngineInput> ReadInputAsync(CancellationToken token)
+        public async Task<EngineInput> ReadInputAsync(CancellationToken token)
         {
-            await Task.Yield();
-            return EngineInput.None;
+            var input = EngineInput.None;
+            while (!token.IsCancellationRequested && !InputBuffer.TryDequeue(out input))
+            {
+                await Task.Yield();
+            }
+
+            return input;
         }
 
         public async Task UpdateViewAsync(Engine engine, EngineInput input, CancellationToken token)

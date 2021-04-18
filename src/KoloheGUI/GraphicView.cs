@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
-using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Controls;
@@ -17,8 +15,6 @@ namespace Kolohe.GUI
 
         private readonly MainWindow _mainWindow;
 
-        private readonly ConcurrentQueue<KeyEventArgs> _inputQueue = new ConcurrentQueue<KeyEventArgs>();
-
         public GraphicView(MainWindow mainWindow, int width, int height) : base(width, height)
         {
             _mainWindow = mainWindow;
@@ -27,30 +23,48 @@ namespace Kolohe.GUI
 
         private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
         {
-            _inputQueue.Enqueue(e);
-        }
-
-        public override async Task<EngineInput> ReadInputAsync(CancellationToken token)
-        {
-            return await Task.Run(async () =>
+            var input = EngineInput.None;
+            switch (e.Key)
             {
-                KeyEventArgs? input = null;
-                while (!token.IsCancellationRequested && !_inputQueue.TryDequeue(out input))
-                {
-                    await Task.Yield();
-                }
-
-                if (input is not null)
-                {
-                    switch (input.Key)
-                    {
-                        default:
-                            return EngineInput.HaltEngine;
-                    }
-                }
-
-                return EngineInput.None;
-            });
+                case Key.NumPad8:
+                case Key.Up:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionUp : EngineInput.DirectionUp;
+                    break;
+                case Key.NumPad9:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionUpRight : EngineInput.DirectionUpRight;
+                    break;
+                case Key.NumPad6:
+                case Key.Right:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionRight : EngineInput.DirectionRight;
+                    break;
+                case Key.NumPad3:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionDownRight : EngineInput.DirectionDownRight;
+                    break;
+                case Key.NumPad2:
+                case Key.Down:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionDown : EngineInput.DirectionDown;
+                    break;
+                case Key.NumPad1:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionDownLeft : EngineInput.DirectionDownLeft;
+                    break;
+                case Key.NumPad4:
+                case Key.Left:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionLeft : EngineInput.DirectionLeft;
+                    break;
+                case Key.NumPad7:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionUpLeft : EngineInput.DirectionUpLeft;
+                    break;
+                case Key.NumPad5:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.ModifiedDirectionCenter : EngineInput.DirectionCenter;
+                    break;
+                case Key.R:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.RefreshView : EngineInput.None;
+                    break;
+                case Key.C:
+                    input = e.KeyModifiers.HasFlag(KeyModifiers.Control) ? EngineInput.HaltEngine : EngineInput.None;
+                    break;
+            }
+            InputBuffer.Enqueue(input);
         }
 
         protected override bool SyncScreenDimensions()

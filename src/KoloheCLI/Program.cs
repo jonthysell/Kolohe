@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Kolohe.CLI
 {
@@ -12,7 +13,8 @@ namespace Kolohe.CLI
 
         static void Main(string[] args)
         {
-            Console.TreatControlCAsInput = true;
+            Console.CancelKeyPress += Console_CancelKeyPress;
+
             Console.CursorVisible = false;
             Console.ResetColor();
 
@@ -21,12 +23,19 @@ namespace Kolohe.CLI
             var view = new ConsoleView();
             var engine = new Engine(view);
 
-            var task = engine.StartAsync(_cts.Token);
-            task.Wait();
+            var engineTask = engine.StartAsync(_cts.Token);
+            var readKeysTask = view.ReadKeysAsync(_cts.Token);
+            Task.WaitAll(engineTask, readKeysTask);
 
             Console.CursorVisible = true;
             Console.ResetColor();
             Console.Clear();
+        }
+
+        private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+        {
+            _cts.Cancel();
+            e.Cancel = true;
         }
     }
 }

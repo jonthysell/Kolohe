@@ -14,44 +14,67 @@ namespace Kolohe.CLI
 
         public ConsoleView() : base(Console.WindowWidth, Console.WindowHeight) { }
 
-        public override async Task<EngineInput> ReadInputAsync(CancellationToken token)
+        public async Task ReadKeysAsync(CancellationToken token)
         {
-            return await Task.Run(() =>
+            while (!token.IsCancellationRequested)
             {
-                var input = Console.ReadKey(true);
+                while (!Console.KeyAvailable)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
 
-                switch (input.Key)
+                    await Task.Yield();
+                }
+
+                var input = EngineInput.None;
+
+                var cki = Console.ReadKey(true);
+
+                switch (cki.Key)
                 {
                     case ConsoleKey.NumPad8:
                     case ConsoleKey.UpArrow:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUp : EngineInput.DirectionUp;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUp : EngineInput.DirectionUp;
+                        break;
                     case ConsoleKey.NumPad9:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUpRight : EngineInput.DirectionUpRight;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUpRight : EngineInput.DirectionUpRight;
+                        break;
                     case ConsoleKey.NumPad6:
                     case ConsoleKey.RightArrow:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionRight : EngineInput.DirectionRight;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionRight : EngineInput.DirectionRight;
+                        break;
                     case ConsoleKey.NumPad3:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDownRight : EngineInput.DirectionDownRight;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDownRight : EngineInput.DirectionDownRight;
+                        break;
                     case ConsoleKey.NumPad2:
                     case ConsoleKey.DownArrow:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDown : EngineInput.DirectionDown;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDown : EngineInput.DirectionDown;
+                        break;
                     case ConsoleKey.NumPad1:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDownLeft : EngineInput.DirectionDownLeft;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionDownLeft : EngineInput.DirectionDownLeft;
+                        break;
                     case ConsoleKey.NumPad4:
                     case ConsoleKey.LeftArrow:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionLeft : EngineInput.DirectionLeft;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionLeft : EngineInput.DirectionLeft;
+                        break;
                     case ConsoleKey.NumPad7:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUpLeft : EngineInput.DirectionUpLeft;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionUpLeft : EngineInput.DirectionUpLeft;
+                        break;
                     case ConsoleKey.NumPad5:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionCenter : EngineInput.DirectionCenter;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.ModifiedDirectionCenter : EngineInput.DirectionCenter;
+                        break;
                     case ConsoleKey.R:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.RefreshView : EngineInput.None;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.RefreshView : EngineInput.None;
+                        break;
                     case ConsoleKey.C:
-                        return input.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.HaltEngine : EngineInput.None;
+                        input = cki.Modifiers.HasFlag(ConsoleModifiers.Control) ? EngineInput.HaltEngine : EngineInput.None;
+                        break;
                 }
 
-                return EngineInput.None;
-            });
+                InputBuffer.Enqueue(input);
+            }
         }
 
         protected override bool SyncScreenDimensions()
