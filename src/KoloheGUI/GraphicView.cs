@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
 using System.Threading.Tasks;
 
 using Avalonia.Input;
@@ -76,9 +77,21 @@ namespace Kolohe.GUI
             TileControls = new TileControl?[width, height];
         }
 
-        protected override bool SyncScreenDimensions()
+        protected override async Task<bool> SyncScreenDimensionsAsync()
         {
             bool refresh = false;
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                int expectedWidth = (int)(Window.ScreenCanvas?.Bounds.Width ?? 0) / TileControl.TileWidth;
+                int expectedHeight = (int)(Window.ScreenCanvas?.Bounds.Height ?? 0) / TileControl.TileHeight;
+
+                if (expectedWidth != ScreenBounds.Width || expectedHeight != ScreenBounds.Height)
+                {
+                    Resize(expectedWidth, expectedHeight);
+                    refresh = true;
+                }
+            });
 
             return refresh;
         }

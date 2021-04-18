@@ -77,25 +77,28 @@ namespace Kolohe.CLI
             }
         }
 
-        protected override bool SyncScreenDimensions()
+        protected override async Task<bool> SyncScreenDimensionsAsync()
         {
-            bool refresh = false;
-            if (Console.WindowWidth != ScreenBounds.Width || Console.WindowHeight != ScreenBounds.Height)
+            return await Task.Run(() =>
             {
-                Resize(Console.WindowWidth, Console.WindowHeight);
-                refresh = true;
-            }
+                bool refresh = false;
+                if (Console.WindowWidth != ScreenBounds.Width || Console.WindowHeight != ScreenBounds.Height)
+                {
+                    Resize(Console.WindowWidth, Console.WindowHeight);
+                    refresh = true;
+                }
 
-            if (Console.WindowWidth != Console.BufferWidth || Console.WindowHeight != Console.BufferHeight)
-            {
+                if (Console.WindowWidth != Console.BufferWidth || Console.WindowHeight != Console.BufferHeight)
+                {
 #pragma warning disable CA1416 // Validate platform compatibility
-                Console.SetWindowPosition(0, 0);
-                Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+                    Console.SetWindowPosition(0, 0);
+                    Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
 #pragma warning restore CA1416 // Validate platform compatibility
-                refresh = true;
-            }
+                    refresh = true;
+                }
 
-            return refresh;
+                return refresh;
+            });
         }
 
         protected override ConsoleTile GetMapTile(MapTile mapTile, bool player)

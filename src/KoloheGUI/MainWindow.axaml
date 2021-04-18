@@ -13,6 +13,8 @@
       <DockPanel>
         <Canvas Background="Transparent"
                   ClipToBounds="True"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
                   Name="ScreenCanvas" />
       </DockPanel>
     </Panel>

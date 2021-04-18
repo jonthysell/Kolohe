@@ -64,7 +64,7 @@ namespace Kolohe
         public async Task UpdateViewAsync(Engine engine, EngineInput input, CancellationToken token)
         {
             // Re-sync the screen
-            bool forceRefresh = SyncScreenDimensions() || input == EngineInput.RefreshView;
+            bool forceRefresh = await SyncScreenDimensionsAsync() || input == EngineInput.RefreshView;
 
             // Process input to re-center map
             switch (input)
@@ -119,8 +119,9 @@ namespace Kolohe
             }
         }
 
-        protected virtual bool SyncScreenDimensions()
+        protected virtual async Task<bool> SyncScreenDimensionsAsync()
         {
+            await Task.Yield();
             return false;
         }
 

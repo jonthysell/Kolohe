@@ -2,14 +2,16 @@
 // Licensed under the MIT License.
 
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
 
 namespace Kolohe.GUI
 {
     public class TileControl : Panel
     {
-        public const int TileWidth = 8;
-        public const int TileHeight = 16;
+        public const int TileWidth = 16;
+        public const int TileHeight = 32;
+        public const int FontSize = 28;
         private TextBlock _child;
 
         public TileControl() : this(new GraphicTile()) { }
@@ -21,6 +23,10 @@ namespace Kolohe.GUI
 
             _child = new TextBlock();
             _child.FontFamily = FontFamily.Parse("Consolas");
+            _child.FontSize = FontSize;
+            _child.HorizontalAlignment = HorizontalAlignment.Center;
+            _child.VerticalAlignment = VerticalAlignment.Center;
+            _child.TextAlignment = TextAlignment.Center;
             Children.Add(_child);
             Update(graphicTile);
         }
