@@ -3,9 +3,9 @@
 
 using System.Threading.Tasks;
 
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace Kolohe.GUI
 {
@@ -13,12 +13,15 @@ namespace Kolohe.GUI
     {
         public readonly GraphicTile DefaultTile = new GraphicTile();
 
-        private readonly MainWindow _mainWindow;
+        public readonly MainWindow Window;
 
-        public GraphicView(MainWindow mainWindow, int width, int height) : base(width, height)
+        public TileControl?[,] TileControls { get; protected set; } 
+
+        public GraphicView(MainWindow window, int width, int height) : base(width, height)
         {
-            _mainWindow = mainWindow;
-            _mainWindow.KeyDown += MainWindow_KeyDown;
+            TileControls = new TileControl?[width, height];
+            Window = window;
+            Window.KeyDown += MainWindow_KeyDown;
         }
 
         private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
@@ -67,6 +70,12 @@ namespace Kolohe.GUI
             InputBuffer.Enqueue(input);
         }
 
+        public override void Resize(int width, int height)
+        {
+            base.Resize(width, height);
+            TileControls = new TileControl?[width, height];
+        }
+
         protected override bool SyncScreenDimensions()
         {
             bool refresh = false;
@@ -103,17 +112,34 @@ namespace Kolohe.GUI
 
         protected override async Task ClearScreenAsync()
         {
-            await Task.Run(() =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                
+                Window.ScreenCanvas?.Children.Clear();
+                for (int y = 0; y < ScreenBounds.Height; y++)
+                {
+                    for (int x = 0; x < ScreenBounds.Width; x++)
+                    {
+                        TileControls[x, y] = null;
+                    }
+                }
             });
         }
 
         protected override async Task DrawScreenTileAsync(int x, int y)
         {
-            await Task.Run(() =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                
+                var tile = TileBuffer[x, y] ?? DefaultTile;
+
+                var tileControl = TileControls[x, y] ?? new TileControl();
+                tileControl.Update(tile);
+
+                var canvas = Window.ScreenCanvas;
+                if (canvas is not null && !canvas.Children.Contains(tileControl))
+                {
+                    tileControl.Update(x, y);
+                    canvas.Children.Add(tileControl);
+                }
             });
         }
     }

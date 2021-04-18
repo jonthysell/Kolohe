@@ -30,7 +30,7 @@ namespace Kolohe
             TileBuffer = new T?[width, height];
         }
 
-        public void Resize(int width, int height)
+        public virtual void Resize(int width, int height)
         {
             ScreenBounds = new Rect(width, height);
             MapWindow = ScreenBounds.ResizeFromCenter(-1);
