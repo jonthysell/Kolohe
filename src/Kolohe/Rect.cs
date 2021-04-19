@@ -94,6 +94,11 @@ namespace Kolohe
             return RectPart.Outside;
         }
 
+        public (int x, int y) GetCenter()
+        {
+            return (X + (Width / 2), Y + (Height / 2));
+        }
+
         public void ForEach(Action<int, int> action)
         {
             for (int x = X; x <= MaxX; x++)

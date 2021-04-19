@@ -65,10 +65,23 @@ namespace Kolohe
 
                 if (isClear)
                 {
-                    islandRect.ForEach((x, y) =>
+                    (int centerX, int centerY) = islandRect.GetCenter();
+
+                    var targetRect = new Rect(centerX, centerY, 1, 1);
+
+                    while (islandRect.Contains(targetRect))
                     {
-                        map[x, y] = MapTile.Sand;
-                    });
+                        targetRect.ForEach((x, y) =>
+                        {
+                            // Monte carlo
+                            if (random.NextDouble() < 0.25)
+                            {
+                                map[x, y] = MapTile.Sand;
+                            }
+                        });
+                        targetRect = targetRect.ResizeFromCenter(1);
+                    }
+
                     return true;
                 }
             }

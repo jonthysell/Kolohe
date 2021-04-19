@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,8 +18,7 @@ namespace Kolohe
 
         public int Time { get; private set; }
 
-        private readonly Random _gameSeed = new Random();
-        private readonly Random _playerSeed = new Random();
+        private readonly Random _worldRandom = new Random();
 
         private bool _exitRequested = false;
 
@@ -27,7 +27,7 @@ namespace Kolohe
             View = view;
 
             Player = new Player();
-            Map = Map.GenerateWorldMap(_gameSeed);
+            Map = Map.GenerateWorldMap(_worldRandom);
 
             Time = 0;
 
@@ -53,6 +53,7 @@ namespace Kolohe
 
         private void ProcessInput(EngineInput input)
         {
+            Trace.TraceInformation($"ProcessInput(EngineInput.{input});");
             switch (input)
             {
                 case EngineInput.DirectionUp:
