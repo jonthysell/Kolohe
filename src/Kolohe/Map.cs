@@ -34,7 +34,7 @@ namespace Kolohe
             {
                 for (int y = 0; y < map.Height; y++)
                 {
-                    map[x, y] = MapTile.Ocean;
+                    map[x, y] = MapTile.OpenOcean;
                 }
             }
 
@@ -60,27 +60,35 @@ namespace Kolohe
                 bool isClear = true;
                 bufferRect.ForEach((x, y) =>
                 {
-                    isClear = isClear && map[x, y] == MapTile.Ocean;
+                    isClear = isClear && map[x, y] == MapTile.OpenOcean;
                 });
 
                 if (isClear)
                 {
+                    var openSimplex = new OpenSimplex2F(random.Next());
+
                     (int centerX, int centerY) = islandRect.GetCenter();
+                    double islandRadius = Math.Min(islandRect.Width, islandRect.Height) / 3.0;
 
-                    var targetRect = new Rect(centerX, centerY, 1, 1);
-
-                    while (islandRect.Contains(targetRect))
+                    islandRect.ForEach((x, y) =>
                     {
-                        targetRect.ForEach((x, y) =>
+                        // Get average height of surrounding areas to smooth things out
+                        double height = openSimplex.Noise2(x, y) / ((int)Direction.NumDirections + 1);
+                        DirectionExtensions.ForEachDirection(x, y, (dx, dy) =>
                         {
-                            // Monte carlo
-                            if (random.NextDouble() < 0.25)
-                            {
-                                map[x, y] = MapTile.Sand;
-                            }
+                            height += openSimplex.Noise2(dx, dy) / ((int)Direction.NumDirections + 1);
                         });
-                        targetRect = targetRect.ResizeFromCenter(1);
-                    }
+
+                        height = MathExt.RemapValue(height, -1, 1, 0, 1);
+
+                        // Apply logarithmic radial gradient to consolidate land in the middle
+                        double radialGradient = Math.Log(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius);
+                        height -= radialGradient;
+                        height = Math.Clamp(height, 0, 1);
+
+                        // Map height to tiles
+                        map[x, y] = (MapTile)Math.Round(MathExt.RemapValue(height, 0, 1, (int)MapTile.OpenOcean, (int)MapTile.Rock));
+                    });
 
                     return true;
                 }

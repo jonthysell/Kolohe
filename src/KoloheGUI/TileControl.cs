@@ -9,9 +9,9 @@ namespace Kolohe.GUI
 {
     public class TileControl : Panel
     {
-        public const int TileWidth = 16;
-        public const int TileHeight = 32;
-        public const int FontSize = 28;
+        public const int ScaleFactor = 1;
+        public const int TileWidth = 8 * ScaleFactor;
+        public const int TileHeight = 16 * ScaleFactor;
         private TextBlock _child;
 
         public TileControl() : this(new GraphicTile()) { }
@@ -23,7 +23,7 @@ namespace Kolohe.GUI
 
             _child = new TextBlock();
             _child.FontFamily = FontFamily.Parse("Consolas");
-            _child.FontSize = FontSize;
+            _child.FontSize *= ScaleFactor;
             _child.HorizontalAlignment = HorizontalAlignment.Center;
             _child.VerticalAlignment = VerticalAlignment.Center;
             _child.TextAlignment = TextAlignment.Center;

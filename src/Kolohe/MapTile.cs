@@ -6,7 +6,10 @@ namespace Kolohe
     public enum MapTile
     {
         None,
-        Ocean,
+        OpenOcean,
+        Water,
         Sand,
+        Dirt,
+        Rock,
     }
 }

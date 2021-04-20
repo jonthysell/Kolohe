@@ -107,13 +107,26 @@ namespace Kolohe.CLI
 
             switch (mapTile)
             {
-                case MapTile.Ocean:
+                case MapTile.OpenOcean:
                     consoleTile.BackgroundColor = ConsoleColor.DarkBlue;
+                    break;
+                case MapTile.Water:
+                    consoleTile.BackgroundColor = ConsoleColor.Blue;
                     break;
                 case MapTile.Sand:
                     consoleTile.Char = BlockChars.LightShade;
                     consoleTile.BackgroundColor = ConsoleColor.Yellow;
                     consoleTile.ForegroundColor = ConsoleColor.DarkYellow;
+                    break;
+                case MapTile.Dirt:
+                    consoleTile.Char = BlockChars.MediumShade;
+                    consoleTile.BackgroundColor = ConsoleColor.Yellow;
+                    consoleTile.ForegroundColor = ConsoleColor.DarkRed;
+                    break;
+                case MapTile.Rock:
+                    consoleTile.Char = BlockChars.DarkShade;
+                    consoleTile.BackgroundColor = ConsoleColor.Yellow;
+                    consoleTile.ForegroundColor = ConsoleColor.DarkGray;
                     break;
                 default:
                     return new ConsoleTile();

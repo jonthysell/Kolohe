@@ -102,7 +102,7 @@ namespace Kolohe.GUI
 
             switch (mapTile)
             {
-                case MapTile.Ocean:
+                case MapTile.OpenOcean:
                     consoleTile.BackgroundColor = Colors.DarkBlue;
                     break;
                 case MapTile.Sand:

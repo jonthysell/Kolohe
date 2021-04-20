@@ -5,6 +5,7 @@
     <AssemblyName>Kolohe</AssemblyName>
     <RootNamespace>Kolohe</RootNamespace>
     <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <IsPublishable>false</IsPublishable>
   </PropertyGroup>
 
