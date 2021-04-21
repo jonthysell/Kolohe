@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 
 namespace Kolohe
 {
@@ -16,5 +17,32 @@ namespace Kolohe
         {
             return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
         }
+
+        public static void Fill<T>(int x, int y, T targetValue, Func<int, int, T> getter, Action<int, int, T> setter) where T : struct
+        {
+            var originalValue = getter(x, y);
+            var pointsToFill = new Queue<(int, int)>();
+            pointsToFill.Enqueue((x, y));
+
+            while (pointsToFill.Count > 0)
+            {
+                (int px, int py) = pointsToFill.Dequeue();
+
+                if (!targetValue.Equals(getter(px, py)))
+                {
+                    setter(px, py, targetValue);
+                    foreach (var dir in FillDirections)
+                    {
+                        (int dx, int dy) = dir.GetDeltas();
+                        if (originalValue.Equals(getter(px + dx, py + dy)))
+                        {
+                            pointsToFill.Enqueue((px + dx, py + dy));
+                        }
+                    }
+                }
+            }
+        }
+
+        private static readonly Direction[] FillDirections = { Direction.Up, Direction.Right, Direction.Down, Direction.Left };
     }
 }

@@ -83,7 +83,7 @@ namespace Kolohe
 
             if (Map.Contains(targetX, targetY))
             {
-                if (Map[targetX, targetY] != MapTile.None)
+                if (Player.CanTravelOnTile(Map[targetX, targetY]))
                 {
                     // Clear movement
                     Player.X = targetX;

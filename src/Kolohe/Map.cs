@@ -34,7 +34,7 @@ namespace Kolohe
             {
                 for (int y = 0; y < map.Height; y++)
                 {
-                    map[x, y] = MapTile.OpenOcean;
+                    map[x, y] = MapTile.SaltWater;
                 }
             }
 
@@ -60,35 +60,41 @@ namespace Kolohe
                 bool isClear = true;
                 bufferRect.ForEach((x, y) =>
                 {
-                    isClear = isClear && map[x, y] == MapTile.OpenOcean;
+                    isClear = isClear && map[x, y] == MapTile.SaltWater;
                 });
 
                 if (isClear)
                 {
-                    var openSimplex = new OpenSimplex2F(random.Next());
+                    var landNoise = MultiLevelNoise.Generate(random, 8);
+                    var waterNoise = MultiLevelNoise.Generate(random, 8);
 
                     (int centerX, int centerY) = islandRect.GetCenter();
-                    double islandRadius = Math.Min(islandRect.Width, islandRect.Height) / 3.0;
+                    double islandRadius = Math.Min(islandRect.Width, islandRect.Height) / 2.0;
 
                     islandRect.ForEach((x, y) =>
                     {
                         // Get average height of surrounding areas to smooth things out
-                        double height = openSimplex.Noise2(x, y) / ((int)Direction.NumDirections + 1);
+                        double landHeight = landNoise.Noise2(x, y) / ((int)Direction.NumDirections + 1);
+                        double waterAmount = waterNoise.Noise2(x, y) / ((int)Direction.NumDirections + 1);
                         DirectionExtensions.ForEachDirection(x, y, (dx, dy) =>
                         {
-                            height += openSimplex.Noise2(dx, dy) / ((int)Direction.NumDirections + 1);
+                            landHeight += landNoise.Noise2(dx, dy) / ((int)Direction.NumDirections + 1);
+                            waterAmount += waterNoise.Noise2(dx, dy) / ((int)Direction.NumDirections + 1);
                         });
 
-                        height = MathExt.RemapValue(height, -1, 1, 0, 1);
+                        landHeight = MathExt.RemapValue(landHeight, -1, 1, 0, 1);
+                        waterAmount = MathExt.RemapValue(waterAmount, -1, 1, 0, 1);
 
-                        // Apply logarithmic radial gradient to consolidate land in the middle
-                        double radialGradient = Math.Log(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius);
-                        height -= radialGradient;
-                        height = Math.Clamp(height, 0, 1);
+                        // Apply radial gradient to consolidate land in the middle
+                        double radialGradient = Math.Pow(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius, 2);
+                        landHeight *= Math.Max(0, 1.0 - radialGradient);
+                        waterAmount *= Math.Max(0, 1.0 - radialGradient);
 
-                        // Map height to tiles
-                        map[x, y] = (MapTile)Math.Round(MathExt.RemapValue(height, 0, 1, (int)MapTile.OpenOcean, (int)MapTile.Rock));
+                        // Map height to land-based tiles
+                        map[x, y] = (MapTile)MathExt.RemapValue(landHeight, 0, 1, (int)MapTile.FreshWater, (int)MapTile.Rock);
                     });
+
+                    MathExt.Fill(islandRect.X, islandRect.Y, MapTile.SaltWater, (x, y) => map[x, y], (x, y, val) => map[x, y] = val);
 
                     return true;
                 }
