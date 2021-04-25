@@ -27,8 +27,8 @@ namespace Kolohe
             for (int i = 0; i < _noise.Length; i++)
             {
                 result += MathExt.RemapValue(_noise[i].Noise2(x / frequency, y / frequency), -1, 1, min, max) * amplitude;
-                frequency *= 2;
-                amplitude *= 0.5;
+                frequency *= 10;
+                amplitude *= 0.1;
             }
 
             return result;

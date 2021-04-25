@@ -83,13 +83,13 @@ namespace Kolohe
                         });
 
                         // Apply radial gradient to consolidate land in the middle
-                        double radialGradient = Math.Pow(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius, 2);
-                        landHeight *= Math.Max(0, 1.0 - radialGradient);
-                        waterAmount *= Math.Max(0, 1.0 - radialGradient);
+                        double radialGradient = Math.Pow(Math.Clamp(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius, 0, 1), 2);
+                        landHeight *= 1.0 - radialGradient;
+                        waterAmount *= Math.Log10(1.0 - radialGradient);
 
                         // Map height to land-based tiles
 
-                        var tile = waterAmount < 0.3 ? MapTile.FreshWater : MapTile.Dirt;
+                        var tile = MapTile.FreshWater;
                         if (landHeight < 0.30)
                         {
                             tile = MapTile.FreshWater;
@@ -98,16 +98,13 @@ namespace Kolohe
                         {
                             tile = MapTile.Sand;
                         }
-                        else if (landHeight < 0.9)
+                        else if (landHeight < 0.50)
                         {
-                            if (waterAmount > 0.90)
-                            {
-                                tile = MapTile.FreshWater;
-                            }
-                            else if (waterAmount > 0.6)
-                            {
-                                tile = MapTile.Grass;
-                            }
+                            tile = MapTile.Dirt;
+                        }
+                        else if (landHeight < 0.70)
+                        {
+                            tile = MapTile.Grass;
                         }
                         else
                         {

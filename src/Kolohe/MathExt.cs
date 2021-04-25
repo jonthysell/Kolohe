@@ -8,9 +8,10 @@ namespace Kolohe
 {
     public static class MathExt
     {
-        public static double RemapValue(double value, double inMin, double inMax, double outMin, double outMax)
+        public static double RemapValue(double value, double inMin, double inMax, double outMin, double outMax, bool clamp = true)
         {
-            return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
+            var outValue = outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
+            return clamp ? Math.Clamp(outValue, outMin, outMax) : outValue;
         }
 
         public static double GetDistance(int x1, int y1, int x2, int y2)
