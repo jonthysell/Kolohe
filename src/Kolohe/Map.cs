@@ -74,16 +74,13 @@ namespace Kolohe
                     islandRect.ForEach((x, y) =>
                     {
                         // Get average height of surrounding areas to smooth things out
-                        double landHeight = landNoise.Noise2(x, y) / ((int)Direction.NumDirections + 1);
-                        double waterAmount = waterNoise.Noise2(x, y) / ((int)Direction.NumDirections + 1);
-                        DirectionExtensions.ForEachDirection(x, y, (dx, dy) =>
+                        double landHeight = landNoise.Noise2(x, y, 0, 1) / ((int)Direction.NumDirections + 1);
+                        double waterAmount = waterNoise.Noise2(x, y, 0, 1) / ((int)Direction.NumDirections + 1);
+                        DirectionExtensions.ForEachDirection(x, y, (x2, y2) =>
                         {
-                            landHeight += landNoise.Noise2(dx, dy) / ((int)Direction.NumDirections + 1);
-                            waterAmount += waterNoise.Noise2(dx, dy) / ((int)Direction.NumDirections + 1);
+                            landHeight += landNoise.Noise2(x2, y2, 0, 1) / ((int)Direction.NumDirections + 1);
+                            waterAmount += waterNoise.Noise2(x2, y2, 0, 1) / ((int)Direction.NumDirections + 1);
                         });
-
-                        landHeight = MathExt.RemapValue(landHeight, -1, 1, 0, 1);
-                        waterAmount = MathExt.RemapValue(waterAmount, -1, 1, 0, 1);
 
                         // Apply radial gradient to consolidate land in the middle
                         double radialGradient = Math.Pow(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius, 2);
@@ -91,7 +88,32 @@ namespace Kolohe
                         waterAmount *= Math.Max(0, 1.0 - radialGradient);
 
                         // Map height to land-based tiles
-                        map[x, y] = (MapTile)MathExt.RemapValue(landHeight, 0, 1, (int)MapTile.FreshWater, (int)MapTile.Rock);
+
+                        var tile = waterAmount < 0.3 ? MapTile.FreshWater : MapTile.Dirt;
+                        if (landHeight < 0.30)
+                        {
+                            tile = MapTile.FreshWater;
+                        }
+                        else if (landHeight < 0.40)
+                        {
+                            tile = MapTile.Sand;
+                        }
+                        else if (landHeight < 0.9)
+                        {
+                            if (waterAmount > 0.90)
+                            {
+                                tile = MapTile.FreshWater;
+                            }
+                            else if (waterAmount > 0.6)
+                            {
+                                tile = MapTile.Grass;
+                            }
+                        }
+                        else
+                        {
+                            tile = MapTile.Rock;
+                        }
+                        map[x, y] = tile;
                     });
 
                     MathExt.Fill(islandRect.X, islandRect.Y, MapTile.SaltWater, (x, y) => map[x, y], (x, y, val) => map[x, y] = val);

@@ -119,8 +119,8 @@ namespace Kolohe.CLI
                     consoleTile.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
                 case MapTile.Dirt:
-                    consoleTile.Char = BlockChars.LightShade;
-                    consoleTile.BackgroundColor = ConsoleColor.Red;
+                    consoleTile.Char = BlockChars.MediumShade;
+                    consoleTile.BackgroundColor = ConsoleColor.Yellow;
                     consoleTile.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
                 case MapTile.Grass:
@@ -140,7 +140,7 @@ namespace Kolohe.CLI
             if (player)
             {
                 consoleTile.Char = '@';
-                consoleTile.ForegroundColor = ConsoleColor.Green;
+                consoleTile.ForegroundColor = ConsoleColor.White;
             }
 
             return consoleTile;

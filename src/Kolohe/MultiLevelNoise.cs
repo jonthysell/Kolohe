@@ -18,7 +18,7 @@ namespace Kolohe
             }
         }
 
-        public double Noise2(double x, double y)
+        public double Noise2(double x, double y, double min = -1, double max = 1)
         {
             double result = 0;
             double frequency = 1.0;
@@ -26,7 +26,7 @@ namespace Kolohe
 
             for (int i = 0; i < _noise.Length; i++)
             {
-                result += _noise[i].Noise2(x * frequency, y * frequency) * amplitude;
+                result += MathExt.RemapValue(_noise[i].Noise2(x / frequency, y / frequency), -1, 1, min, max) * amplitude;
                 frequency *= 2;
                 amplitude *= 0.5;
             }
