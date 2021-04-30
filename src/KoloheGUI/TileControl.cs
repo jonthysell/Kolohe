@@ -7,12 +7,12 @@ using Avalonia.Media;
 
 namespace Kolohe.GUI
 {
-    public class TileControl : Panel
+    public class TileControl : TextBlock
     {
         public const int ScaleFactor = 1;
-        public const int TileWidth = 8 * ScaleFactor;
+        public const int TileWidth = 16 * ScaleFactor;
         public const int TileHeight = 16 * ScaleFactor;
-        private TextBlock _child;
+        //private TextBlock _child;
 
         public TileControl() : this(new GraphicTile()) { }
 
@@ -21,21 +21,19 @@ namespace Kolohe.GUI
             Width = TileWidth;
             Height = TileHeight;
 
-            _child = new TextBlock();
-            _child.FontFamily = FontFamily.Parse("Consolas");
-            _child.FontSize *= ScaleFactor;
-            _child.HorizontalAlignment = HorizontalAlignment.Center;
-            _child.VerticalAlignment = VerticalAlignment.Center;
-            _child.TextAlignment = TextAlignment.Center;
-            Children.Add(_child);
+            FontFamily = FontFamily.Parse("Square");
+            FontSize = 16;
+            HorizontalAlignment = HorizontalAlignment.Center;
+            VerticalAlignment = VerticalAlignment.Center;
+            TextAlignment = TextAlignment.Center;
             Update(graphicTile);
         }
 
         public void Update(GraphicTile graphicTile)
         {
             Background = new SolidColorBrush(graphicTile.BackgroundColor);
-            _child.Foreground = new SolidColorBrush(graphicTile.ForegroundColor);
-            _child.Text = graphicTile.Char.ToString();
+            Foreground = new SolidColorBrush(graphicTile.ForegroundColor);
+            Text = graphicTile.Char.ToString();
         }
 
         public void Update(int tileX, int tileY)

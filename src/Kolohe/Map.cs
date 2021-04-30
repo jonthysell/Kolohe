@@ -65,8 +65,8 @@ namespace Kolohe
 
                 if (isClear)
                 {
-                    var landNoise = MultiLevelNoise.Generate(random, 8);
-                    var waterNoise = MultiLevelNoise.Generate(random, 8);
+                    var landNoise = MultiLevelNoise.Generate(random, 8, 0, 1, 4, 0.25);
+                    var waterNoise = MultiLevelNoise.Generate(random, 8, 0, 1, 4, 0.25);
 
                     (int centerX, int centerY) = islandRect.GetCenter();
                     double islandRadius = Math.Min(islandRect.Width, islandRect.Height) / 2.0;
@@ -74,37 +74,36 @@ namespace Kolohe
                     islandRect.ForEach((x, y) =>
                     {
                         // Get average height of surrounding areas to smooth things out
-                        double landHeight = landNoise.Noise2(x, y, 0, 1) / ((int)Direction.NumDirections + 1);
-                        double waterAmount = waterNoise.Noise2(x, y, 0, 1) / ((int)Direction.NumDirections + 1);
+                        double landHeight = landNoise.Noise2(x, y) / ((int)Direction.NumDirections + 1);
+                        double waterAmount = waterNoise.Noise2(x, y) / ((int)Direction.NumDirections + 1);
                         DirectionExtensions.ForEachDirection(x, y, (x2, y2) =>
                         {
-                            landHeight += landNoise.Noise2(x2, y2, 0, 1) / ((int)Direction.NumDirections + 1);
-                            waterAmount += waterNoise.Noise2(x2, y2, 0, 1) / ((int)Direction.NumDirections + 1);
+                            landHeight += landNoise.Noise2(x2, y2) / ((int)Direction.NumDirections + 1);
+                            waterAmount += waterNoise.Noise2(x2, y2) / ((int)Direction.NumDirections + 1);
                         });
 
                         // Apply radial gradient to consolidate land in the middle
-                        double radialGradient = Math.Pow(Math.Clamp(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius, 0, 1), 2);
-                        landHeight *= 1.0 - radialGradient;
-                        waterAmount *= Math.Log10(1.0 - radialGradient);
+                        double radialGradient = Math.Pow(1.0 - Math.Clamp(MathExt.GetDistance(x, y, centerX, centerY) / islandRadius, 0, 1), 2);
+                        landHeight *= radialGradient;
+                        waterAmount *= radialGradient;
 
                         // Map height to land-based tiles
-
                         var tile = MapTile.FreshWater;
-                        if (landHeight < 0.30)
+                        if (landHeight < 0.05)
                         {
                             tile = MapTile.FreshWater;
                         }
-                        else if (landHeight < 0.40)
+                        else if (landHeight < 0.10)
                         {
                             tile = MapTile.Sand;
                         }
-                        else if (landHeight < 0.50)
+                        else if (landHeight < 0.15)
                         {
                             tile = MapTile.Dirt;
                         }
-                        else if (landHeight < 0.70)
+                        else if (landHeight < 0.50)
                         {
-                            tile = MapTile.Grass;
+                            tile = waterAmount > 0.30 && waterAmount < 0.35 ? MapTile.FreshWater : MapTile.Grass;
                         }
                         else
                         {

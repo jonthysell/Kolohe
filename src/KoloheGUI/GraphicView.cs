@@ -4,8 +4,10 @@
 using System;
 using System.Threading.Tasks;
 
+using Avalonia;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 
 namespace Kolohe.GUI
@@ -98,17 +100,35 @@ namespace Kolohe.GUI
 
         protected override GraphicTile GetMapTile(MapTile mapTile, bool player)
         {
-            var consoleTile = new GraphicTile();
+            var graphicTile = new GraphicTile();
 
             switch (mapTile)
             {
                 case MapTile.SaltWater:
-                    consoleTile.BackgroundColor = Colors.DarkBlue;
+                    graphicTile.BackgroundColor = Colors.DarkBlue;
+                    break;
+                case MapTile.FreshWater:
+                    graphicTile.BackgroundColor = Colors.Cyan;
                     break;
                 case MapTile.Sand:
-                    consoleTile.Char = BlockChars.LightShade;
-                    consoleTile.BackgroundColor = Colors.Yellow;
-                    consoleTile.ForegroundColor = Colors.SandyBrown;
+                    graphicTile.Char = BlockChars.LightShade;
+                    graphicTile.BackgroundColor = Colors.Yellow;
+                    graphicTile.ForegroundColor = Colors.SandyBrown;
+                    break;
+                case MapTile.Dirt:
+                    graphicTile.Char = BlockChars.MediumShade;
+                    graphicTile.BackgroundColor = Colors.Yellow;
+                    graphicTile.ForegroundColor = Colors.SandyBrown;
+                    break;
+                case MapTile.Grass:
+                    graphicTile.Char = BlockChars.LightShade;
+                    graphicTile.BackgroundColor = Colors.Green;
+                    graphicTile.ForegroundColor = Colors.DarkGreen;
+                    break;
+                case MapTile.Rock:
+                    graphicTile.Char = BlockChars.DarkShade;
+                    graphicTile.BackgroundColor = Colors.Gray;
+                    graphicTile.ForegroundColor = Colors.DarkGray;
                     break;
                 default:
                     return new GraphicTile();
@@ -116,11 +136,11 @@ namespace Kolohe.GUI
 
             if (player)
             {
-                consoleTile.Char = '@';
-                consoleTile.ForegroundColor = Colors.Green;
+                graphicTile.Char = '@';
+                graphicTile.ForegroundColor = Colors.White;
             }
 
-            return consoleTile;
+            return graphicTile;
         }
 
         protected override async Task ClearScreenAsync()

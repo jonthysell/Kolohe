@@ -10,9 +10,9 @@ namespace Kolohe
 
         public const int WorldIslandCount = 1;
 
-        public const int MinIslandSize = 100;
-        public const int MaxIslandSize = 100;
+        public const int MinIslandSize = 122;
+        public const int MaxIslandSize = 122;
 
-        public const int MinIslandDistance = 4;
+        public const int MinIslandDistance = 2;
     }
 }
