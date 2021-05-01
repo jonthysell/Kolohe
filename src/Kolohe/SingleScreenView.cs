@@ -80,16 +80,16 @@ namespace Kolohe
                     MoveMapCamera((Direction)((int)input - (int)EngineInput.ModifiedDirectionUp));
                     break;
                 case EngineInput.ModifiedDirectionCenter:
-                    CenterMapCamera(engine.Player.X, engine.Player.Y);
+                    CenterMapCamera(engine.Game.Player.X, engine.Game.Player.Y);
                     break;
             }
 
             // Move camera to keep player on screen
             var playerBounds = MapWindow.Shift(MapCameraXOffset, MapCameraYOffset).ResizeFromCenter(-1);
-            if (playerBounds.GetRectPart(engine.Player.X, engine.Player.Y) != RectPart.Inside)
+            if (playerBounds.GetRectPart(engine.Game.Player.X, engine.Game.Player.Y) != RectPart.Inside)
             {
                 // TODO: Centering on player is aggressive but fine for now, replace with smoother pan
-                CenterMapCamera(engine.Player.X, engine.Player.Y);
+                CenterMapCamera(engine.Game.Player.X, engine.Game.Player.Y);
             }
 
             if (forceRefresh)
@@ -108,7 +108,7 @@ namespace Kolohe
                     int mapX = screenX - MapWindow.X + MapCameraXOffset;
                     int mapY = screenY - MapWindow.Y + MapCameraYOffset;
 
-                    newTile = engine.Map.Contains(mapX, mapY) ? GetMapTile(engine.Map[mapX, mapY], engine.Creatures[mapX, mapY]?.Type) : null;
+                    newTile = engine.Game.WorldMap.Contains(mapX, mapY) ? GetMapTile(engine.Game.WorldMap[mapX, mapY], engine.Game.Creatures[mapX, mapY]?.Type) : null;
                 }
 
                 if (forceRefresh || (oldTile is not null && !oldTile.Equals(newTile)) || (newTile is not null && !newTile.Equals(oldTile)))

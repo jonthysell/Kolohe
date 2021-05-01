@@ -12,15 +12,7 @@ namespace Kolohe
     {
         public readonly IView View;
 
-        public readonly Player Player;
-
-        public readonly Map Map;
-
-        public readonly Creature?[,] Creatures;
-
-        public int Time { get; private set; }
-
-        private readonly Random _worldRandom = new Random();
+        public readonly Game Game;
 
         private bool _exitRequested = false;
 
@@ -28,13 +20,7 @@ namespace Kolohe
         {
             View = view;
 
-            Player = new Player();
-            Map = Map.GenerateWorldMap(_worldRandom);
-            Creatures = new Creature?[Map.Width, Map.Height];
-
-            Time = 0;
-
-            SetPlayerPosition(Map.Width / 2, Map.Height / 2);
+            Game = Game.NewGame();
         }
 
         public void Halt()
@@ -66,46 +52,15 @@ namespace Kolohe
                 case EngineInput.DirectionDownLeft:
                 case EngineInput.DirectionLeft:
                 case EngineInput.DirectionUpLeft:
-                    ProcessPlayerMove((Direction)((int)input - (int)EngineInput.DirectionUp));
+                    Game.TryPlayerMove((Direction)((int)input - (int)EngineInput.DirectionUp));
                     break;
                 case EngineInput.DirectionCenter:
-                    Step();
+                    Game.PlayerWait();
                     break;
                 case EngineInput.HaltEngine:
-                    _exitRequested = true;
+                    Halt();
                     break;
             }
-        }
-
-        private void ProcessPlayerMove(Direction direction)
-        {
-            (int dx, int dy) = direction.GetDeltas();
-            int targetX = Player.X + dx;
-            int targetY = Player.Y + dy;
-
-            if (Map.Contains(targetX, targetY) && Player.CanPlaceOnTile(Map[targetX, targetY]))
-            {
-                var currentCreature = Creatures[targetX, targetY];
-                if (currentCreature is null || currentCreature == Player)
-                {
-                    // Open position
-                    Creatures[Player.X, Player.Y] = null;
-                    SetPlayerPosition(targetX, targetY);
-                    Step();
-                }
-            }
-        }
-
-        private void SetPlayerPosition(int targetX, int targetY)
-        {
-            Player.X = targetX;
-            Player.Y = targetY;
-            Creatures[targetX, targetY] = Player;
-        }
-
-        private void Step()
-        {
-            Time++;
         }
     }
 }

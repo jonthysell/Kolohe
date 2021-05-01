@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Jon Thysell <http://jonthysell.com>
 // Licensed under the MIT License.
 
+using System;
+
 namespace Kolohe
 {
     public class Player : Creature
@@ -11,6 +13,11 @@ namespace Kolohe
         {
             X = -1;
             Y = -1;
+        }
+
+        public static Player GeneratePlayer(Random random)
+        {
+            return new Player();
         }
     }
 }
