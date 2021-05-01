@@ -148,31 +148,36 @@ namespace Kolohe.GUI
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Window.ScreenCanvas?.Children.Clear();
-                for (int y = 0; y < ScreenBounds.Height; y++)
-                {
-                    for (int x = 0; x < ScreenBounds.Width; x++)
-                    {
-                        TileControls[x, y] = null;
-                    }
-                }
             });
+            for (int y = 0; y < ScreenBounds.Height; y++)
+            {
+                for (int x = 0; x < ScreenBounds.Width; x++)
+                {
+                    TileControls[x, y] = null;
+                }
+            }
         }
 
         protected override async Task DrawScreenTileAsync(int x, int y)
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var tile = TileBuffer[x, y] ?? DefaultTile;
+                var tile = TileBuffer[x, y] ??= DefaultTile;
 
-                var tileControl = TileControls[x, y] ?? new TileControl();
-                tileControl.Update(tile);
-
-                var canvas = Window.ScreenCanvas;
-                if (canvas is not null && !canvas.Children.Contains(tileControl))
+                if (TileControls[x, y] is null)
                 {
+                    var tileControl = new TileControl();
                     tileControl.Update(x, y);
-                    canvas.Children.Add(tileControl);
+                    var canvas = Window.ScreenCanvas;
+                    if (canvas is not null)
+                    {
+                        tileControl.Update(x, y);
+                        canvas.Children.Add(tileControl);
+                    }
+                    TileControls[x, y] = tileControl;
                 }
+
+                TileControls[x, y]?.Update(tile);                
             });
         }
     }
