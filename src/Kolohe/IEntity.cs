@@ -5,6 +5,6 @@ namespace Kolohe
 {
     public interface IEntity
     {
-        bool CanTravelOnTile(MapTile mapTile);
+        bool CanPlaceOnTile(MapTile mapTile);
     }
 }

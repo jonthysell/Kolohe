@@ -108,7 +108,7 @@ namespace Kolohe
                     int mapX = screenX - MapWindow.X + MapCameraXOffset;
                     int mapY = screenY - MapWindow.Y + MapCameraYOffset;
 
-                    newTile = engine.Map.Contains(mapX, mapY) ? GetMapTile(engine.Map[mapX, mapY], mapX == engine.Player.X && mapY == engine.Player.Y) : null;
+                    newTile = engine.Map.Contains(mapX, mapY) ? GetMapTile(engine.Map[mapX, mapY], engine.Creatures[mapX, mapY]?.Type) : null;
                 }
 
                 if (forceRefresh || (oldTile is not null && !oldTile.Equals(newTile)) || (newTile is not null && !newTile.Equals(oldTile)))
@@ -125,7 +125,7 @@ namespace Kolohe
             return false;
         }
 
-        protected virtual T? GetMapTile(MapTile mapTile, bool player)
+        protected virtual T? GetMapTile(MapTile mapTile, CreatureType? creatureType)
         {
             return null;
         }

@@ -98,49 +98,54 @@ namespace Kolohe.GUI
             return refresh;
         }
 
-        protected override GraphicTile GetMapTile(MapTile mapTile, bool player)
+        protected override GraphicTile GetMapTile(MapTile mapTile, CreatureType? creatureType)
         {
-            var graphicTile = new GraphicTile();
+            var tile = new GraphicTile();
 
             switch (mapTile)
             {
                 case MapTile.SaltWater:
-                    graphicTile.BackgroundColor = Colors.DarkBlue;
+                    tile.BackgroundColor = Colors.DarkBlue;
                     break;
                 case MapTile.FreshWater:
-                    graphicTile.BackgroundColor = Colors.Cyan;
+                    tile.BackgroundColor = Colors.Cyan;
                     break;
                 case MapTile.Sand:
-                    graphicTile.Char = BlockChars.LightShade;
-                    graphicTile.BackgroundColor = Colors.Yellow;
-                    graphicTile.ForegroundColor = Colors.SandyBrown;
+                    tile.Char = BlockChars.LightShade;
+                    tile.BackgroundColor = Colors.Yellow;
+                    tile.ForegroundColor = Colors.SandyBrown;
                     break;
                 case MapTile.Dirt:
-                    graphicTile.Char = BlockChars.MediumShade;
-                    graphicTile.BackgroundColor = Colors.Yellow;
-                    graphicTile.ForegroundColor = Colors.SandyBrown;
+                    tile.Char = BlockChars.MediumShade;
+                    tile.BackgroundColor = Colors.Yellow;
+                    tile.ForegroundColor = Colors.SandyBrown;
                     break;
                 case MapTile.Grass:
-                    graphicTile.Char = BlockChars.LightShade;
-                    graphicTile.BackgroundColor = Colors.Green;
-                    graphicTile.ForegroundColor = Colors.DarkGreen;
+                    tile.Char = BlockChars.LightShade;
+                    tile.BackgroundColor = Colors.Green;
+                    tile.ForegroundColor = Colors.DarkGreen;
                     break;
                 case MapTile.Rock:
-                    graphicTile.Char = BlockChars.DarkShade;
-                    graphicTile.BackgroundColor = Colors.Gray;
-                    graphicTile.ForegroundColor = Colors.DarkGray;
+                    tile.Char = BlockChars.DarkShade;
+                    tile.BackgroundColor = Colors.Gray;
+                    tile.ForegroundColor = Colors.DarkGray;
                     break;
                 default:
                     return new GraphicTile();
             }
 
-            if (player)
+            if (creatureType.HasValue)
             {
-                graphicTile.Char = '@';
-                graphicTile.ForegroundColor = Colors.White;
+                switch (creatureType)
+                {
+                    case CreatureType.Player:
+                        tile.Char = '@';
+                        tile.ForegroundColor = Colors.White;
+                        break;
+                }
             }
 
-            return graphicTile;
+            return tile;
         }
 
         protected override async Task ClearScreenAsync()

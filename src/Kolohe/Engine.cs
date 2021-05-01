@@ -16,6 +16,8 @@ namespace Kolohe
 
         public readonly Map Map;
 
+        public readonly Creature?[,] Creatures;
+
         public int Time { get; private set; }
 
         private readonly Random _worldRandom = new Random();
@@ -28,11 +30,11 @@ namespace Kolohe
 
             Player = new Player();
             Map = Map.GenerateWorldMap(_worldRandom);
+            Creatures = new Creature?[Map.Width, Map.Height];
 
             Time = 0;
 
-            Player.X = Map.Width / 2;
-            Player.Y = Map.Height / 2;
+            SetPlayerPosition(Map.Width / 2, Map.Height / 2);
         }
 
         public void Halt()
@@ -81,16 +83,24 @@ namespace Kolohe
             int targetX = Player.X + dx;
             int targetY = Player.Y + dy;
 
-            if (Map.Contains(targetX, targetY))
+            if (Map.Contains(targetX, targetY) && Player.CanPlaceOnTile(Map[targetX, targetY]))
             {
-                if (Player.CanTravelOnTile(Map[targetX, targetY]))
+                var currentCreature = Creatures[targetX, targetY];
+                if (currentCreature is null || currentCreature == Player)
                 {
-                    // Clear movement
-                    Player.X = targetX;
-                    Player.Y = targetY;
+                    // Open position
+                    Creatures[Player.X, Player.Y] = null;
+                    SetPlayerPosition(targetX, targetY);
                     Step();
                 }
             }
+        }
+
+        private void SetPlayerPosition(int targetX, int targetY)
+        {
+            Player.X = targetX;
+            Player.Y = targetY;
+            Creatures[targetX, targetY] = Player;
         }
 
         private void Step()

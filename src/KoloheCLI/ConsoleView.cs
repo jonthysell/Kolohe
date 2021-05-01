@@ -101,49 +101,54 @@ namespace Kolohe.CLI
             });
         }
 
-        protected override ConsoleTile GetMapTile(MapTile mapTile, bool player)
+        protected override ConsoleTile GetMapTile(MapTile mapTile, CreatureType? creatureType)
         {
-            var consoleTile = new ConsoleTile();
+            var tile = new ConsoleTile();
 
             switch (mapTile)
             {
                 case MapTile.SaltWater:
-                    consoleTile.BackgroundColor = ConsoleColor.DarkBlue;
+                    tile.BackgroundColor = ConsoleColor.DarkBlue;
                     break;
                 case MapTile.FreshWater:
-                    consoleTile.BackgroundColor = ConsoleColor.Blue;
+                    tile.BackgroundColor = ConsoleColor.Blue;
                     break;
                 case MapTile.Sand:
-                    consoleTile.Char = BlockChars.LightShade;
-                    consoleTile.BackgroundColor = ConsoleColor.Yellow;
-                    consoleTile.ForegroundColor = ConsoleColor.DarkYellow;
+                    tile.Char = BlockChars.LightShade;
+                    tile.BackgroundColor = ConsoleColor.Yellow;
+                    tile.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
                 case MapTile.Dirt:
-                    consoleTile.Char = BlockChars.MediumShade;
-                    consoleTile.BackgroundColor = ConsoleColor.Yellow;
-                    consoleTile.ForegroundColor = ConsoleColor.DarkYellow;
+                    tile.Char = BlockChars.MediumShade;
+                    tile.BackgroundColor = ConsoleColor.Yellow;
+                    tile.ForegroundColor = ConsoleColor.DarkYellow;
                     break;
                 case MapTile.Grass:
-                    consoleTile.Char = BlockChars.LightShade;
-                    consoleTile.BackgroundColor = ConsoleColor.Green;
-                    consoleTile.ForegroundColor = ConsoleColor.DarkGreen;
+                    tile.Char = BlockChars.LightShade;
+                    tile.BackgroundColor = ConsoleColor.Green;
+                    tile.ForegroundColor = ConsoleColor.DarkGreen;
                     break;
                 case MapTile.Rock:
-                    consoleTile.Char = BlockChars.DarkShade;
-                    consoleTile.BackgroundColor = ConsoleColor.Gray;
-                    consoleTile.ForegroundColor = ConsoleColor.DarkGray;
+                    tile.Char = BlockChars.DarkShade;
+                    tile.BackgroundColor = ConsoleColor.Gray;
+                    tile.ForegroundColor = ConsoleColor.DarkGray;
                     break;
                 default:
                     return new ConsoleTile();
             }
 
-            if (player)
+            if (creatureType.HasValue)
             {
-                consoleTile.Char = '@';
-                consoleTile.ForegroundColor = ConsoleColor.White;
+                switch (creatureType)
+                {
+                    case CreatureType.Player:
+                        tile.Char = '@';
+                        tile.ForegroundColor = ConsoleColor.White;
+                        break;
+                }
             }
 
-            return consoleTile;
+            return tile;
         }
 
         protected override async Task ClearScreenAsync()

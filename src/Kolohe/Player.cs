@@ -3,14 +3,14 @@
 
 namespace Kolohe
 {
-    public class Player : IEntity
+    public class Player : Creature
     {
-        public int X;
-        public int Y;
+        public override CreatureType Type => CreatureType.Player;
 
-        public bool CanTravelOnTile(MapTile mapTile)
+        public Player()
         {
-            return mapTile.IsLand() || mapTile.IsWater();
+            X = -1;
+            Y = -1;
         }
     }
 }
